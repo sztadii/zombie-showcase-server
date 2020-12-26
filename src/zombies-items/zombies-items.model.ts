@@ -7,3 +7,19 @@ export class ZombieItemDTO {
   @IsString()
   userId: string
 }
+
+export class Item {
+  price: number
+  name: string
+  id: string
+  createdAt: Date
+}
+
+export class CurrencyRate {
+  currency: string
+  ask: number
+  bid: number
+  code: string
+  id: string
+  createdAt: Date
+}
