@@ -29,7 +29,7 @@ export class CRUDService<E = any> {
     return {
       ...documentData,
       id: document.id,
-      createdA: document.createTime.toDate()
+      createdAt: document.createTime.toDate()
     }
   }
 
