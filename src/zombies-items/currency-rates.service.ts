@@ -2,13 +2,12 @@ import { Injectable } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import axios from 'axios'
 import { CRUDService } from '../common/crud.service'
-import { CurrencyRate } from './zombies-items.model'
+import { CurrencyRateDocument } from './zombies-items.model'
 
 @Injectable()
-export class CurrencyRatesService extends CRUDService<CurrencyRate> {
+export class CurrencyRatesService extends CRUDService<CurrencyRateDocument> {
   constructor() {
     super('currency-rates')
-    this.fetchAndUpdateCurrencyRates()
   }
 
   @Cron('* 0 0 * * *')
