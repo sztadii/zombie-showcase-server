@@ -10,10 +10,26 @@ import {
 } from '@nestjs/common'
 import { ZombiesItemsService } from './zombies-items.service'
 import { ZombieItemDTO } from './zombies-items.model'
+import { ItemsService } from './items.service'
+import { CurrencyRatesService } from './currency-rates.service'
 
 @Controller('zombies-items')
 export class ZombiesItemsController {
-  constructor(private readonly zombiesItemsService: ZombiesItemsService) {}
+  constructor(
+    private readonly zombiesItemsService: ZombiesItemsService,
+    private readonly itemsService: ItemsService,
+    private readonly currencyRatesService: CurrencyRatesService
+  ) {}
+
+  @Get('items')
+  findItems() {
+    return this.itemsService.find()
+  }
+
+  @Get('rates')
+  findRates() {
+    return this.currencyRatesService.find()
+  }
 
   @Get()
   async findAllZombiesItems() {
