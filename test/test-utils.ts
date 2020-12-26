@@ -1,4 +1,7 @@
 import { Firestore } from '@google-cloud/firestore'
+import { Test } from '@nestjs/testing'
+import { AppModule } from '../src/app.module'
+import { runMiddleware } from '../src/middleware'
 
 export async function cleanDatabase() {
   try {
@@ -18,4 +21,18 @@ export async function cleanDatabase() {
   } catch (e) {
     throw new Error('Not able to clean database')
   }
+}
+
+export async function getInitApp() {
+  const moduleFixture = await Test.createTestingModule({
+    imports: [AppModule]
+  }).compile()
+
+  const app = moduleFixture.createNestApplication()
+
+  runMiddleware(app)
+
+  await app.init()
+
+  return app
 }

@@ -1,27 +1,13 @@
-import { Test } from '@nestjs/testing'
-import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
-import { AppModule } from '../src/app.module'
-import { cleanDatabase } from './test-utils'
+import { cleanDatabase, getInitApp } from './test-utils'
 
 describe('zombies-items', () => {
   let app: INestApplication
 
   beforeEach(async () => {
     await cleanDatabase()
-
-    const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule]
-    }).compile()
-
-    app = moduleFixture.createNestApplication()
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true
-      })
-    )
-    await app.init()
+    app = await getInitApp()
   })
 
   function getServer() {
@@ -134,6 +120,26 @@ describe('zombies-items', () => {
     expect(response.body).toHaveLength(1)
   })
 
+  it('GET /zombies-items return list with all available and pre-fetched properties', async () => {
+    const itemResponse = await getServer().post('/zombies-items/items').send({
+      price: 100,
+      name: 'Drink'
+    })
+
+    const itemId = itemResponse.body.id
+    const newZombieItem = { userId: '1qaz2wx', itemId }
+    await getServer().post('/zombies-items').send(newZombieItem)
+
+    const response = await getServer().get('/zombies-items')
+
+    expect(response.status).toBe(200)
+    expect(response.body).toHaveLength(1)
+    expect(response.body[0]).toHaveProperty('userId', '1qaz2wx')
+    expect(response.body[0]).toHaveProperty('itemId', itemId)
+    expect(response.body[0]).toHaveProperty('item')
+    expect(response.body[0].item).toHaveProperty('name', 'Drink')
+  })
+
   it('GET /zombies-items return items list for particular user', async () => {
     const chocoResponse = await getServer().post('/zombies-items/items').send({
       price: 100,
@@ -167,7 +173,7 @@ describe('zombies-items', () => {
     expect(response.body[0].item).toHaveProperty('price', 5000)
   })
 
-  it('GET /zombies-items do not thor error when items list is empty for particular user', async () => {
+  it('GET /zombies-items do not throw an error when items list is empty for particular user', async () => {
     const response = await getServer().get(
       '/zombies-items?userId=user-with-phone-id'
     )
@@ -288,6 +294,33 @@ describe('zombies-items', () => {
     expect(getResponse.body[0]).toHaveProperty('userId', newZombieItem.userId)
     expect(getResponse.body[0]).toHaveProperty('itemId', newZombieItem.itemId)
     expect(getResponse.body[0]).toHaveProperty('createdAt')
+  })
+
+  it('POST /zombies-items create new zombie-item document and do not save useless properties sent by client', async () => {
+    const itemResponse = await getServer().post('/zombies-items/items').send({
+      price: 100,
+      name: 'Chocolate'
+    })
+
+    const newZombieItem = {
+      userId: '2wsx3edc',
+      itemId: itemResponse.body.id,
+      uselessProperty: 'useless value'
+    }
+    const postResponse = await getServer()
+      .post('/zombies-items')
+      .send(newZombieItem)
+
+    const getResponse = await getServer().get('/zombies-items')
+
+    expect(postResponse.status).toBe(201)
+
+    expect(getResponse.status).toBe(200)
+    expect(getResponse.body).toHaveLength(1)
+    expect(getResponse.body[0]).toHaveProperty('userId', newZombieItem.userId)
+    expect(getResponse.body[0]).toHaveProperty('itemId', newZombieItem.itemId)
+    expect(getResponse.body[0]).toHaveProperty('createdAt')
+    expect(getResponse.body[0]).not.toHaveProperty('uselessProperty')
   })
 
   it('POST /zombies-items throw an validation error during zombie item creation', async () => {
