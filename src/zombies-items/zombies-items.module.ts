@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
-import { ItemsService } from './items.service'
-import { ZombiesItemsService } from './zombies-items.service'
+import { ItemsService } from './services/items.service'
+import { ZombiesItemsService } from './services/zombies-items.service'
 import { ZombiesItemsController } from './zombies-items.controller'
-import { CurrencyRatesService } from './currency-rates.service'
+import { CurrencyRatesService } from './services/currency-rates.service'
 
 @Module({
   controllers: [ZombiesItemsController],

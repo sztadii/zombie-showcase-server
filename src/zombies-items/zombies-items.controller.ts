@@ -9,7 +9,7 @@ import {
   Post,
   Query
 } from '@nestjs/common'
-import { ZombiesItemsService } from './zombies-items.service'
+import { ZombiesItemsService } from './services/zombies-items.service'
 import {
   ZombieItemDTO,
   ItemDTO,
@@ -17,8 +17,8 @@ import {
   CurrencyRateDTO,
   CurrencyRateDocument
 } from './zombies-items.model'
-import { ItemsService } from './items.service'
-import { CurrencyRatesService } from './currency-rates.service'
+import { ItemsService } from './services/items.service'
+import { CurrencyRatesService } from './services/currency-rates.service'
 
 @Controller('zombies-items')
 export class ZombiesItemsController {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import axios from 'axios'
-import { CRUDService } from '../common/crud.service'
-import { ItemDocument } from './zombies-items.model'
+import { CRUDService } from '../../common/crud.service'
+import { ItemDocument } from '../zombies-items.model'
 
 @Injectable()
 export class ItemsService extends CRUDService<ItemDocument> {

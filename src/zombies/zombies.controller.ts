@@ -9,7 +9,7 @@ import {
   HttpException,
   HttpStatus
 } from '@nestjs/common'
-import { ZombiesService } from './zombies.service'
+import { ZombiesService } from './services/zombies.service'
 import { ZombieDTO, ZombieDocument } from './zombies.model'
 
 @Controller('zombies')
