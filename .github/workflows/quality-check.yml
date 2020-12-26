@@ -21,5 +21,8 @@ jobs:
       - name: Linting
         run: npm run lint
 
+      - name: E2E tests
+        run: npm run test:e2e
+
       - name: Building docker image
         run: docker build .
