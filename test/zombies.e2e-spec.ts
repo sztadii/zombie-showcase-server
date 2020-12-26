@@ -1,41 +1,37 @@
-import { Test } from '@nestjs/testing'
-import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
-import { AppModule } from '../src/app.module'
-import { cleanDatabase } from './test-utils'
+import { cleanDatabase, getInitApp } from './test-utils'
 
 describe('zombies', () => {
   let app: INestApplication
 
   beforeEach(async () => {
     await cleanDatabase()
-
-    const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule]
-    }).compile()
-
-    app = moduleFixture.createNestApplication()
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true
-      })
-    )
-    await app.init()
+    app = await getInitApp()
   })
 
   function getServer() {
     return request(app.getHttpServer())
   }
 
-  it('GET /zombies return empty list of when zombies collection is empty', async () => {
+  it('GET /zombies return an empty list of zombies when zombies collection is empty', async () => {
     const response = await getServer().get('/zombies')
 
     expect(response.status).toBe(200)
     expect(response.body).toHaveLength(0)
   })
 
-  it('GET /zombies/:id return zombie', async () => {
+  it('GET /zombies return an list of zombies when zombies collection is filled', async () => {
+    const newZombie = { name: 'Tonny "Iron Man" Stark' }
+    await getServer().post('/zombies').send(newZombie)
+
+    const getResponse = await getServer().get('/zombies')
+
+    expect(getResponse.status).toBe(200)
+    expect(getResponse.body).toHaveLength(1)
+  })
+
+  it('GET /zombies/:id return single zombie', async () => {
     const newZombie = { name: 'Tonny "Iron Man" Stark' }
     const postResponse = await getServer().post('/zombies').send(newZombie)
 
@@ -57,7 +53,7 @@ describe('zombies', () => {
     expect(response.body).toHaveProperty('message', 'Zombie not found')
   })
 
-  it('POST /zombies create new zombie document', async () => {
+  it('POST /zombies create new zombie', async () => {
     const newZombie = { name: 'Capitan America' }
     const postResponse = await getServer().post('/zombies').send(newZombie)
 
@@ -72,6 +68,22 @@ describe('zombies', () => {
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
+  it('POST /zombies create new zombie and skip useless properties send by client', async () => {
+    const newZombie = { name: 'Capitan America', wrongProperty: 'wrong value' }
+    const postResponse = await getServer().post('/zombies').send(newZombie)
+
+    const getResponse = await getServer().get('/zombies')
+
+    expect(postResponse.status).toBe(201)
+    expect(postResponse.body).toHaveProperty('name', newZombie.name)
+
+    expect(getResponse.status).toBe(200)
+    expect(getResponse.body).toHaveLength(1)
+    expect(getResponse.body[0]).toHaveProperty('name', newZombie.name)
+    expect(getResponse.body[0]).toHaveProperty('createdAt')
+    expect(getResponse.body[0]).not.toHaveProperty('wrongProperty')
+  })
+
   it('POST /zombies throw an validation error during zombie creation', async () => {
     const emptyObjectResponse = await getServer().post('/zombies').send({})
     const wrongPropertyResponse = await getServer()
@@ -79,7 +91,10 @@ describe('zombies', () => {
       .send({ firstName: 'Capitan America' })
 
     expect(emptyObjectResponse.status).toBe(400)
+    expect(emptyObjectResponse.body).toHaveProperty('message')
+
     expect(wrongPropertyResponse.status).toBe(400)
+    expect(wrongPropertyResponse.body).toHaveProperty('message')
   })
 
   it('PATCH /zombies/:id allow to update the zombie', async () => {
@@ -118,7 +133,7 @@ describe('zombies', () => {
     expect(getResponse.body).toHaveProperty('name', oldZombie.name)
   })
 
-  it('DELETE /zombies/:id allows to delete the zombie', async () => {
+  it('DELETE /zombies/:id allows to delete a zombie', async () => {
     const newZombie = { name: 'Tonny "Iron Man" Stark updated' }
 
     const postResponse = await getServer().post('/zombies').send(newZombie)
