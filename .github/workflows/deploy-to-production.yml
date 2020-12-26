@@ -7,7 +7,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: popular-movies-server
+  SERVICE_NAME: zombie-showcase-server
 
 jobs:
   build_deploy:
