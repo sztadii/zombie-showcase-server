@@ -2,6 +2,7 @@ import { Firestore } from '@google-cloud/firestore'
 import { Test } from '@nestjs/testing'
 import { AppModule } from '../src/app.module'
 import { runMiddleware } from '../src/middleware'
+import * as request from 'supertest'
 
 export async function cleanDatabase() {
   try {
@@ -23,7 +24,7 @@ export async function cleanDatabase() {
   }
 }
 
-export async function getInitApp() {
+export async function getServer() {
   const moduleFixture = await Test.createTestingModule({
     imports: [AppModule]
   }).compile()
@@ -34,5 +35,5 @@ export async function getInitApp() {
 
   await app.init()
 
-  return app
+  return request(app.getHttpServer())
 }
