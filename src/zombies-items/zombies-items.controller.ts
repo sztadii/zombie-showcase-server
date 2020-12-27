@@ -10,13 +10,7 @@ import {
   Query
 } from '@nestjs/common'
 import { ZombiesItemsService } from './services/zombies-items.service'
-import {
-  ZombieItemDTO,
-  ItemDTO,
-  ItemDocument,
-  CurrencyRateDTO,
-  CurrencyRateDocument
-} from './zombies-items.model'
+import { ZombieItemDTO } from './zombies-items.model'
 import { ItemsService } from './services/items.service'
 import { CurrencyRatesService } from './services/currency-rates.service'
 
@@ -27,28 +21,6 @@ export class ZombiesItemsController {
     private readonly itemsService: ItemsService,
     private readonly currencyRatesService: CurrencyRatesService
   ) {}
-
-  @Get('items')
-  findItems() {
-    return this.itemsService.find()
-  }
-
-  @Post('items')
-  createItems(@Body() item: ItemDTO): Promise<ItemDocument> {
-    return this.itemsService.create(item)
-  }
-
-  @Get('rates')
-  findRates() {
-    return this.currencyRatesService.find()
-  }
-
-  @Post('rates')
-  createCurrencyRate(
-    @Body() currencyRate: CurrencyRateDTO
-  ): Promise<CurrencyRateDocument> {
-    return this.currencyRatesService.create(currencyRate)
-  }
 
   @Get()
   async findAllZombiesItems(@Query('userId') userId: string) {
