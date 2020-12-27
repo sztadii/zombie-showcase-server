@@ -1,10 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common'
-import {
-  ItemDTO,
-  ItemDocument,
-  CurrencyRateDTO,
-  CurrencyRateDocument
-} from './zombies-items.model'
+import { ItemDTO, CurrencyRateDTO } from './zombies-items.model'
 import { ItemsService } from './services/items.service'
 import { CurrencyRatesService } from './services/currency-rates.service'
 
@@ -28,7 +23,7 @@ export class ExternalController {
   }
 
   @Post('items')
-  createItems(@Body() item: ItemDTO): Promise<ItemDocument> {
+  createItems(@Body() item: ItemDTO) {
     return this.itemsService.create(item)
   }
 
@@ -38,9 +33,7 @@ export class ExternalController {
   }
 
   @Post('rates')
-  createCurrencyRate(
-    @Body() currencyRate: CurrencyRateDTO
-  ): Promise<CurrencyRateDocument> {
+  createCurrencyRate(@Body() currencyRate: CurrencyRateDTO) {
     return this.currencyRatesService.create(currencyRate)
   }
 }

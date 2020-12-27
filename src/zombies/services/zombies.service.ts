@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { CRUDService } from '../../common/crud.service'
-import { ZombieDocument } from '../zombies.model'
+import { ZombieDTO } from '../zombies.model'
 
 @Injectable()
-export class ZombiesService extends CRUDService<ZombieDocument> {
+export class ZombiesService extends CRUDService<ZombieDTO> {
   constructor() {
     super('zombies')
   }
