@@ -24,10 +24,7 @@ export class ZombiesItemsController {
 
   @Get()
   async findAllZombiesItems(@Query('userId') userId: string) {
-    // TODO Validate if user exists
-
-    const allItems = await this.itemsService.find()
-    const allZombieItems = await this.zombiesItemsService.find(
+    const userZombieItems = await this.zombiesItemsService.find(
       userId
         ? {
             fieldPath: 'userId',
@@ -36,13 +33,19 @@ export class ZombiesItemsController {
           }
         : undefined
     )
-    return allZombieItems.map((zombieItem) => {
-      const item = allItems.find((item) => item.id === zombieItem.itemId)
-      return {
-        ...zombieItem,
-        item
-      }
-    })
+
+    // Because we will have max 5 userZombieItems then performance will be ok
+    const userZombieItemsWithPrefetchedItem = await Promise.all(
+      userZombieItems.map(async (zombieItem) => {
+        const item = await this.itemsService.get(zombieItem.itemId)
+        return {
+          ...zombieItem,
+          item
+        }
+      })
+    )
+
+    return userZombieItemsWithPrefetchedItem
   }
 
   @Get(':id')
@@ -95,6 +98,8 @@ export class ZombiesItemsController {
     if (!item) {
       throw new HttpException('Item not found', HttpStatus.NOT_FOUND)
     }
+
+    // TODO Please throw NOT_FOUND error if user not exists
 
     return this.zombiesItemsService.create(zombieItem)
   }
