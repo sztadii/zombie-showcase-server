@@ -10,6 +10,7 @@ export class ItemsService extends CRUDService<ItemDocument> {
     super('items')
   }
 
+  // TODO Please test the cron functionality
   @Cron('* 0 0 * * *')
   private async fetchAndUpdateItems() {
     console.log('fetchAndUpdateItems start')
