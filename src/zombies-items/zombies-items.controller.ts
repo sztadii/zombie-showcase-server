@@ -58,10 +58,6 @@ export class ZombiesItemsController {
 
     const item = await this.itemsService.get(zombieItem.itemId)
 
-    if (!item) {
-      throw new HttpException('Item not found', HttpStatus.NOT_FOUND)
-    }
-
     return {
       ...zombieItem,
       item
