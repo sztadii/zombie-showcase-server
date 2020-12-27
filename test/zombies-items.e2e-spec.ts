@@ -228,7 +228,7 @@ describe('zombies-items', () => {
     expect(response.body).toHaveProperty('message', 'Zombie item not found')
   })
 
-  it('POST /zombies-items/:userId/sum return sum of items in few different currencies', async () => {
+  it('GET /zombies-items/:userId/sum return sum of items in few different currencies', async () => {
     const chocoItem = await getServer().post('/external/items').send({
       price: 100,
       name: 'Chocolate'
@@ -240,6 +240,7 @@ describe('zombies-items', () => {
     })
 
     await getServer().post('/external/rates').send({
+      id: 'USD',
       currency: 'Dollar',
       ask: 10.5,
       bid: 10.1,
@@ -247,6 +248,7 @@ describe('zombies-items', () => {
     })
 
     await getServer().post('/external/rates').send({
+      id: 'EUR',
       currency: 'Euro',
       ask: 20.5,
       bid: 20.1,

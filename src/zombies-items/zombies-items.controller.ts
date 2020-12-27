@@ -67,9 +67,11 @@ export class ZombiesItemsController {
   @Get(':userId/sum')
   async getItemsSum(@Param('userId') userId: string) {
     const zombieItems = await this.findAllZombiesItems(userId)
-    const requestedCurrencies = await this.currencyRatesService.findByCurrencyCodes(
-      ['USD', 'EUR']
-    )
+    const requestedCurrencies = await Promise.all([
+      this.currencyRatesService.get('USD'),
+      this.currencyRatesService.get('EUR')
+    ])
+
     const itemsSum = zombieItems.reduce((sum, current) => {
       return sum + current.item.price
     }, 0)

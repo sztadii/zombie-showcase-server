@@ -1,4 +1,4 @@
-import { IsString, IsNumber } from 'class-validator'
+import { IsString, IsNumber, IsOptional } from 'class-validator'
 
 export class ZombieItemDTO {
   @IsString()
@@ -9,6 +9,10 @@ export class ZombieItemDTO {
 }
 
 export class ItemDTO {
+  @IsOptional()
+  @IsString()
+  id: string
+
   @IsNumber()
   price: number
 
@@ -17,6 +21,10 @@ export class ItemDTO {
 }
 
 export class CurrencyRateDTO {
+  @IsOptional()
+  @IsString()
+  id: string
+
   @IsString()
   currency: string
 

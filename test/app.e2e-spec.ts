@@ -9,10 +9,11 @@ describe('app', () => {
     app = await getInitApp()
   })
 
-  it('GET / return welcome message', async () => {
+  it('GET / return welcome message', async (done) => {
     const response = await request(app.getHttpServer()).get('/')
 
     expect(response.status).toBe(200)
     expect(response.text).toBe('Welcome to zombie-showcase-server')
+    done()
   })
 })
