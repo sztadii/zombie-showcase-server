@@ -8,8 +8,8 @@ REST API to present little information about zombies
 - Docker - to build and get some dependencies ( like Firestore etc )
 
 ## How to run our application ( in development mode )
-At first, you need to create .env file ( please use as an example .env-example ) in root directory
-After please install NodeJS, after that please run below commands:
+At first, you need to create .env file ( please use as an example .env-example ) in root directory <br/>
+After please install NodeJS and then run below commands:
 ```
 npm install
 npm run start:dev
