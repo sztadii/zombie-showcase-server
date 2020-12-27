@@ -10,6 +10,7 @@ export class CurrencyRatesService extends CRUDService<CurrencyRateDocument> {
     super('currency-rates')
   }
 
+  // TODO Please test the cron functionality
   @Cron('* 0 0 * * *')
   private async fetchAndUpdateCurrencyRates() {
     console.log('fetchAndUpdateCurrencyRates start')
