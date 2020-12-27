@@ -12,6 +12,7 @@ At first, you need to create .env file ( please use as an example .env-example )
 After please install NodeJS and then run below commands:
 ```
 npm install
+npm run db
 npm run start:dev
 ```
 
