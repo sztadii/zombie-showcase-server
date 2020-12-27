@@ -3,11 +3,16 @@ import { Cron } from '@nestjs/schedule'
 import axios from 'axios'
 import { CRUDService } from '../../common/crud.service'
 import { ItemDocument } from '../zombies-items.model'
+import { isTestEnv } from '../../common/is-test-env'
 
 @Injectable()
 export class ItemsService extends CRUDService<ItemDocument> {
   constructor() {
     super('items')
+
+    if (!isTestEnv()) {
+      this.fetchAndUpdateItems()
+    }
   }
 
   // TODO Please test the cron functionality
