@@ -16,4 +16,4 @@ npm run start:dev
 ```
 
 ## Other info
-Production version of app is deployed to GCP [LINK](https://zombie-showcase-server-kgptm5ui3q-ez.a.run.app)
+Production version of app is deployed to GCP [LINK](https://zombie-showcase-server-kgptm5ui3q-ey.a.run.app)
