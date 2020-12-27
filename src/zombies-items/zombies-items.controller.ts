@@ -68,31 +68,24 @@ export class ZombiesItemsController {
   @Get(':userId/sum')
   async getItemsSum(@Param('userId') userId: string) {
     const zombieItems = await this.findAllZombiesItems(userId)
-
-    // TODO Filter by code in service
-    const allCurrencyRates = await this.currencyRatesService.find()
-
-    const requestedCurrenciesCodes = ['USD', 'EUR']
-    const requestedCurrencies = allCurrencyRates.filter((currencyRate) =>
-      requestedCurrenciesCodes.includes(currencyRate.code)
+    const requestedCurrencies = await this.currencyRatesService.findByCurrencyCodes(
+      ['USD', 'EUR']
     )
     const itemsSum = zombieItems.reduce((sum, current) => {
       return sum + current.item.price
     }, 0)
 
-    const itemsSumInDifferentCurrencies = requestedCurrencies.map(
-      (currency) => {
+    const itemsSumInDifferentCurrencies = requestedCurrencies
+      .map((currency) => {
         const sumValue = (itemsSum / currency.bid).toFixed(2)
         return {
           code: currency.code,
           sumValue: Number(sumValue)
         }
-      }
-    )
+      })
+      .sort((a, b) => a.code.localeCompare(b.code))
 
-    return itemsSumInDifferentCurrencies.sort((a, b) =>
-      a.code.localeCompare(b.code)
-    )
+    return itemsSumInDifferentCurrencies
   }
 
   @Post()

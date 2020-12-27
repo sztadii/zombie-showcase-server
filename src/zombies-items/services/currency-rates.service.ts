@@ -9,6 +9,14 @@ export class CurrencyRatesService extends CRUDService<CurrencyRateDocument> {
     super('currency-rates')
   }
 
+  async findByCurrencyCodes(codes: string[]) {
+    const allCurrencyRates = await this.find()
+    const requestedCurrencies = allCurrencyRates.filter((currencyRate) =>
+      codes.includes(currencyRate.code)
+    )
+    return requestedCurrencies
+  }
+
   async fetchAndUpdateCurrencyRates() {
     console.log('fetchAndUpdateCurrencyRates start')
 
