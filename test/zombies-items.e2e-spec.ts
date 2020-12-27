@@ -217,7 +217,7 @@ describe('zombies-items', () => {
     expect(response.body).toHaveProperty('message', 'Zombie item not found')
   })
 
-  it('GET /zombies-items/:userId/sum return sum of items in few different currencies', async () => {
+  it('GET /zombies-items/:userId/price-sum return price sum of items in few different currencies', async () => {
     const chocoItem = await server.post('/external/items').send({
       price: 100,
       name: 'Chocolate'
@@ -256,7 +256,9 @@ describe('zombies-items', () => {
       .post('/zombies-items')
       .send({ userId: 'user-2-id', itemId: iphoneItem.body.id })
 
-    const firstUserItemsSum = await server.get('/zombies-items/user-1-id/sum')
+    const firstUserItemsSum = await server.get(
+      '/zombies-items/user-1-id/price-sum'
+    )
 
     expect(firstUserItemsSum.status).toBe(200)
     expect(firstUserItemsSum.body).toEqual([

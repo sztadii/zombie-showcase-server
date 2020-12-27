@@ -10,7 +10,7 @@ export class ExternalController {
     private readonly currencyRatesService: CurrencyRatesService
   ) {}
 
-  // This endpoint will be trigger by GCP cloud scheduler
+  // This endpoint will be trigger by GCP cloud scheduler everyday at 00:00 UTC
   @Post()
   async fetchAllExternalElements() {
     await this.itemsService.fetchAndUpdateItems()
@@ -23,12 +23,12 @@ export class ExternalController {
   }
 
   @Post('items')
-  createItems(@Body() item: ItemDTO) {
+  createItem(@Body() item: ItemDTO) {
     return this.itemsService.create(item)
   }
 
   @Get('rates')
-  findRates() {
+  findCurrencyRates() {
     return this.currencyRatesService.find()
   }
 

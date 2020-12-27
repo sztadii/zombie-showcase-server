@@ -38,6 +38,6 @@ export class CurrencyRateDTO {
   code: string
 }
 
-export type ExchangeRateServiceResponse = Array<{
+export type ExchangeRatesServiceResponse = Array<{
   rates: CurrencyRateDTO[]
 }>

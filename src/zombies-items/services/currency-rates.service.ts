@@ -3,7 +3,7 @@ import axios from 'axios'
 import { CRUDService } from '../../common/crud.service'
 import {
   CurrencyRateDTO,
-  ExchangeRateServiceResponse
+  ExchangeRatesServiceResponse
 } from '../zombies-items.model'
 
 @Injectable()
@@ -16,10 +16,10 @@ export class CurrencyRatesService extends CRUDService<CurrencyRateDTO> {
     console.log('fetchAndUpdateCurrencyRates start')
 
     try {
-      const exchangeResponse = await axios.get<ExchangeRateServiceResponse>(
+      const exchangeServiceResponse = await axios.get<ExchangeRatesServiceResponse>(
         'http://api.nbp.pl/api/exchangerates/tables/C'
       )
-      const { rates } = exchangeResponse.data[0]
+      const { rates } = exchangeServiceResponse.data[0]
       const ratesWithIds = rates.map((rate) => {
         return {
           ...rate,
