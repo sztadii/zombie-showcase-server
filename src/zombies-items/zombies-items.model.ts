@@ -29,3 +29,7 @@ export class CurrencyRateDTO {
   @IsString()
   code: string
 }
+
+export type ExchangeRateServiceResponse = Array<{
+  rates: CurrencyRateDTO[]
+}>
