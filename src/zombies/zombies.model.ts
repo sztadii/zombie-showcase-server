@@ -5,7 +5,3 @@ export class ZombieDTO {
   @MinLength(10)
   name: string
 }
-
-export class ZombieDocument extends ZombieDTO {
-  createdAt: Date
-}

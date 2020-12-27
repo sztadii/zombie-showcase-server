@@ -6,6 +6,7 @@ import {
   WhereFilterOp
 } from '@google-cloud/firestore'
 import { v4 as uuid } from 'uuid'
+import { CRUDDocument } from './crud.model'
 
 type FindParam = {
   fieldPath: string | FieldPath
@@ -13,7 +14,7 @@ type FindParam = {
   value: any
 }
 
-export class CRUDService<E = any> {
+export class CRUDService<T, E = T & CRUDDocument> {
   private firestore: Firestore
   private collection: CollectionReference<DocumentData>
 

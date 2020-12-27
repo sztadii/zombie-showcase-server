@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import axios from 'axios'
 import { CRUDService } from '../../common/crud.service'
-import { ItemDocument } from '../zombies-items.model'
+import { ItemDTO } from '../zombies-items.model'
 
 @Injectable()
-export class ItemsService extends CRUDService<ItemDocument> {
+export class ItemsService extends CRUDService<ItemDTO> {
   constructor() {
     super('items')
   }

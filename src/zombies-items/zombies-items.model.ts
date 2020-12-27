@@ -16,13 +16,6 @@ export class ItemDTO {
   name: string
 }
 
-export class ItemDocument {
-  price: number
-  name: string
-  id: string
-  createdAt: Date
-}
-
 export class CurrencyRateDTO {
   @IsString()
   currency: string
@@ -35,13 +28,4 @@ export class CurrencyRateDTO {
 
   @IsString()
   code: string
-}
-
-export class CurrencyRateDocument {
-  currency: string
-  ask: number
-  bid: number
-  code: string
-  id: string
-  createdAt: Date
 }
