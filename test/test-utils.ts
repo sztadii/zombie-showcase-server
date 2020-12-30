@@ -24,7 +24,9 @@ export async function cleanDatabase() {
   }
 }
 
-export async function getServer() {
+export type Server = request.SuperTest<request.Test>
+
+export async function getServer(): Promise<Server> {
   const moduleFixture = await Test.createTestingModule({
     imports: [AppModule]
   }).compile()

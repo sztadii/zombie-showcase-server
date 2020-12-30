@@ -1,10 +1,9 @@
-import * as request from 'supertest'
-import { getServer } from './test-utils'
+import { getServer, Server } from './test-utils'
 
 describe('app', () => {
-  let server: request.SuperTest<request.Test>
+  let server: Server
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     server = await getServer()
   })
 

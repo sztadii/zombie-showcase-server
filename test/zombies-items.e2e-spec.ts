@@ -1,30 +1,64 @@
-import * as request from 'supertest'
-import { cleanDatabase, getServer } from './test-utils'
+import { cleanDatabase, getServer, Server } from './test-utils'
+import * as nock from 'nock'
 
 describe('zombies-items', () => {
-  let server: request.SuperTest<request.Test>
+  let server: Server
 
-  beforeEach(async () => {
-    await cleanDatabase()
+  beforeAll(async () => {
     server = await getServer()
   })
 
-  it('POST /external will fetch all external resources', async () => {
+  beforeEach(async () => {
+    await cleanDatabase()
+  })
+
+  it('POST /external will fetch and save all external resources', async () => {
+    nock('http://api.nbp.pl')
+      .get('/api/exchangerates/tables/C')
+      .reply(200, [
+        {
+          rates: [
+            {
+              currency: 'Dollar',
+              ask: 1,
+              bid: 1,
+              code: 'USD'
+            }
+          ]
+        }
+      ])
+
+    nock('https://zombie-items-api.herokuapp.com')
+      .get('/api/items')
+      .reply(200, {
+        items: [
+          {
+            id: '1',
+            price: 100,
+            name: 'Chocolate'
+          }
+        ]
+      })
+
     const itemsBeforePrefetch = await server.get('/external/items')
     const currencyRatesBeforePrefetch = await server.get('/external/rates')
-
     const response = await server.post('/external')
-
     const itemsAfterPrefetch = await server.get('/external/items')
     const currencyRatesAfterPrefetch = await server.get('/external/rates')
 
     expect(response.status).toBe(201)
 
-    expect(itemsBeforePrefetch.body.length === 0).toBeTruthy()
-    expect(currencyRatesBeforePrefetch.body.length === 0).toBeTruthy()
+    expect(itemsBeforePrefetch.body).toHaveLength(0)
+    expect(currencyRatesBeforePrefetch.body).toHaveLength(0)
 
-    expect(itemsAfterPrefetch.body.length > 0).toBeTruthy()
-    expect(currencyRatesAfterPrefetch.body.length > 0).toBeTruthy()
+    expect(itemsAfterPrefetch.body).toHaveLength(1)
+    expect(currencyRatesAfterPrefetch.body).toHaveLength(1)
+
+    expect(itemsAfterPrefetch.body[0]).toHaveProperty('name', 'Chocolate')
+    expect(currencyRatesAfterPrefetch.body[0]).toHaveProperty(
+      'currency',
+      'Dollar'
+    )
   })
 
   it('GET /external/items return empty list of when items collection is empty', async () => {
@@ -121,26 +155,9 @@ describe('zombies-items', () => {
 
     expect(response.status).toBe(200)
     expect(response.body).toHaveLength(1)
-  })
-
-  it('GET /zombies-items return list with all available and pre-fetched properties', async () => {
-    const itemResponse = await server.post('/external/items').send({
-      price: 100,
-      name: 'Drink'
-    })
-
-    const itemId = itemResponse.body.id
-    const newZombieItem = { userId: '1qaz2wx', itemId }
-    await server.post('/zombies-items').send(newZombieItem)
-
-    const response = await server.get('/zombies-items')
-
-    expect(response.status).toBe(200)
-    expect(response.body).toHaveLength(1)
-    expect(response.body[0]).toHaveProperty('userId', '1qaz2wx')
-    expect(response.body[0]).toHaveProperty('itemId', itemId)
     expect(response.body[0]).toHaveProperty('item')
-    expect(response.body[0].item).toHaveProperty('name', 'Drink')
+    expect(response.body[0].item).toHaveProperty('name', 'Chocolate')
+    expect(response.body[0].item).toHaveProperty('price', 100)
   })
 
   it('GET /zombies-items return items list for particular user', async () => {
@@ -201,6 +218,9 @@ describe('zombies-items', () => {
     expect(response.status).toBe(200)
     expect(response.body).toHaveProperty('userId', newZombieItem.userId)
     expect(response.body).toHaveProperty('createdAt')
+    expect(response.body).toHaveProperty('item')
+    expect(response.body.item).toHaveProperty('name', 'Chocolate')
+    expect(response.body.item).toHaveProperty('price', 100)
   })
 
   it('GET /zombies/:id throw an error when id is wrong', async () => {
@@ -311,12 +331,8 @@ describe('zombies-items', () => {
     const getResponse = await server.get('/zombies-items')
 
     expect(postResponse.status).toBe(201)
-
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
-    expect(getResponse.body[0]).toHaveProperty('userId', newZombieItem.userId)
-    expect(getResponse.body[0]).toHaveProperty('itemId', newZombieItem.itemId)
-    expect(getResponse.body[0]).toHaveProperty('createdAt')
     expect(getResponse.body[0]).not.toHaveProperty('uselessProperty')
   })
 
@@ -359,6 +375,9 @@ describe('zombies-items', () => {
     })
 
     const newZombieItem = { userId: '2wsx3edc', itemId: itemResponse.body.id }
+
+    // To be sure that we are going to remove only one element we need at least 2 items in the DB
+    await server.post('/zombies-items').send(newZombieItem)
     const postResponse = await server.post('/zombies-items').send(newZombieItem)
 
     const createdZombieId = postResponse.body.id
@@ -372,8 +391,8 @@ describe('zombies-items', () => {
     const afterDeleteGetResponse = await server.get('/zombies-items')
 
     expect(deleteResponse.status).toBe(200)
-    expect(beforeDeleteGetResponse.body).toHaveLength(1)
-    expect(afterDeleteGetResponse.body).toHaveLength(0)
+    expect(beforeDeleteGetResponse.body).toHaveLength(2)
+    expect(afterDeleteGetResponse.body).toHaveLength(1)
   })
 
   it('DELETE /zombies-items/:id throw an error when id is wrong', async () => {

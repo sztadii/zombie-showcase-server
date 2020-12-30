@@ -1,12 +1,14 @@
-import * as request from 'supertest'
-import { cleanDatabase, getServer } from './test-utils'
+import { cleanDatabase, getServer, Server } from './test-utils'
 
 describe('zombies', () => {
-  let server: request.SuperTest<request.Test>
+  let server: Server
+
+  beforeAll(async () => {
+    server = await getServer()
+  })
 
   beforeEach(async () => {
     await cleanDatabase()
-    server = await getServer()
   })
 
   it('GET /zombies return an empty list of zombies when zombies collection is empty', async () => {
@@ -24,6 +26,8 @@ describe('zombies', () => {
 
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
+    expect(getResponse.body[0]).toHaveProperty('name', newZombie.name)
+    expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
   it('GET /zombies/:id return single zombie', async () => {
@@ -70,12 +74,8 @@ describe('zombies', () => {
     const getResponse = await server.get('/zombies')
 
     expect(postResponse.status).toBe(201)
-    expect(postResponse.body).toHaveProperty('name', newZombie.name)
-
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
-    expect(getResponse.body[0]).toHaveProperty('name', newZombie.name)
-    expect(getResponse.body[0]).toHaveProperty('createdAt')
     expect(getResponse.body[0]).not.toHaveProperty('wrongProperty')
   })
 
@@ -131,6 +131,8 @@ describe('zombies', () => {
   it('DELETE /zombies/:id allows to delete a zombie', async () => {
     const newZombie = { name: 'Tonny "Iron Man" Stark updated' }
 
+    // To be sure that we are going to remove only one element we need at least 2 zombies in the DB
+    await server.post('/zombies').send(newZombie)
     const postResponse = await server.post('/zombies').send(newZombie)
     const createdZombieId = postResponse.body.id
 
@@ -141,8 +143,8 @@ describe('zombies', () => {
     const afterDeleteGetResponse = await server.get('/zombies')
 
     expect(deleteResponse.status).toBe(200)
-    expect(beforeDeleteGetResponse.body).toHaveLength(1)
-    expect(afterDeleteGetResponse.body).toHaveLength(0)
+    expect(beforeDeleteGetResponse.body).toHaveLength(2)
+    expect(afterDeleteGetResponse.body).toHaveLength(1)
   })
 
   it('DELETE /zombies delete all zombies', async () => {
