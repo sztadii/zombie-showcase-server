@@ -105,6 +105,17 @@ export class ZombiesItemsController {
       throw new HttpException('Zombie not found', HttpStatus.NOT_FOUND)
     }
 
+    const currentZombieItems = await this.findAllZombiesItems(zombieItem.userId)
+
+    const maxAllowedItemsForZombie = 5
+    const canCreateNewZombieItem =
+      currentZombieItems.length >= maxAllowedItemsForZombie
+
+    if (canCreateNewZombieItem) {
+      const errorMessage = `Zombie can not have more than ${maxAllowedItemsForZombie} items`
+      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST)
+    }
+
     return this.zombiesItemsService.create(zombieItem)
   }
 
