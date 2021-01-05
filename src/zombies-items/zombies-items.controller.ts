@@ -13,13 +13,15 @@ import { ZombiesItemsService } from './services/zombies-items.service'
 import { ZombieItemDTO } from './zombies-items.model'
 import { ItemsService } from './services/items.service'
 import { CurrencyRatesService } from './services/currency-rates.service'
+import { ZombiesService } from '../zombies/services/zombies.service'
 
 @Controller('zombies-items')
 export class ZombiesItemsController {
   constructor(
     private readonly zombiesItemsService: ZombiesItemsService,
     private readonly itemsService: ItemsService,
-    private readonly currencyRatesService: CurrencyRatesService
+    private readonly currencyRatesService: CurrencyRatesService,
+    private readonly zombiesService: ZombiesService
   ) {}
 
   @Get()
@@ -97,7 +99,11 @@ export class ZombiesItemsController {
       throw new HttpException('Item not found', HttpStatus.NOT_FOUND)
     }
 
-    // TODO Please throw NOT_FOUND error if user not exists
+    const zombie = await this.zombiesService.get(zombieItem.userId)
+
+    if (!zombie) {
+      throw new HttpException('Zombie not found', HttpStatus.NOT_FOUND)
+    }
 
     return this.zombiesItemsService.create(zombieItem)
   }
