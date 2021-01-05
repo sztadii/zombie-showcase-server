@@ -387,6 +387,29 @@ describe('zombies-items', () => {
     expect(wrongUserId.status).toBe(404)
   })
 
+  it('POST /zombies-items throw an error if we want to add new item for zombie who has already 5 items', async () => {
+    const zombie = await createZombie()
+
+    for (let i = 0; i < 5; i++) {
+      const item = await createItem()
+
+      await server
+        .post('/zombies-items')
+        .send({ itemId: item.id, userId: zombie.id })
+    }
+
+    const notAllowedItem = await createItem()
+
+    const notAllowedZombieItem = await server
+      .post('/zombies-items')
+      .send({ itemId: notAllowedItem.id, userId: zombie.id })
+
+    expect(notAllowedZombieItem.status).toBe(400)
+    expect(notAllowedZombieItem.body.message).toBe(
+      'Zombie can not have more than 5 items'
+    )
+  })
+
   it('DELETE /zombies-items delete all zombies', async () => {
     const itemResponse = await server.post('/external/items').send({
       price: 100,
