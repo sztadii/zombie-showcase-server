@@ -1,5 +1,7 @@
 import { cleanDatabase, getServer, Server } from './test-utils'
 import * as nock from 'nock'
+import { ZombieDTO } from '../src/zombies/zombies.model'
+import { ItemDTO } from '../src/zombies-items/zombies-items.model'
 
 describe('zombies-items', () => {
   let server: Server
@@ -11,6 +13,22 @@ describe('zombies-items', () => {
   beforeEach(async () => {
     await cleanDatabase()
   })
+
+  async function createZombie(zombie?: Partial<ZombieDTO>): Promise<ZombieDTO> {
+    const newZombie = { name: 'Random zombie name', ...(zombie || {}) }
+    const postResponse = await server.post('/zombies').send(newZombie)
+    return postResponse.body
+  }
+
+  async function createItem(item?: Partial<ItemDTO>): Promise<ItemDTO> {
+    const newItem = {
+      price: 100,
+      name: 'Random item name',
+      ...(item || {})
+    }
+    const itemResponse = await server.post('/external/items').send(newItem)
+    return itemResponse.body
+  }
 
   it('POST /external will fetch and save all external resources', async () => {
     nock('http://api.nbp.pl')
@@ -147,8 +165,9 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombie = await createZombie({ id: '1qaz2wx' })
 
-    const newZombieItem = { userId: '1qaz2wx', itemId: itemResponse.body.id }
+    const newZombieItem = { userId: zombie.id, itemId: itemResponse.body.id }
     await server.post('/zombies-items').send(newZombieItem)
 
     const response = await server.get('/zombies-items')
@@ -165,18 +184,20 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombieWithChoco = await createZombie({ id: 'user-with-choco-id' })
 
     const iphoneResponse = await server.post('/external/items').send({
       price: 5000,
       name: 'Iphone'
     })
+    const zombieWithPhone = await createZombie({ id: 'user-with-phone-id' })
 
     const chocoZombieItem = {
-      userId: 'user-with-choco-id',
+      userId: zombieWithChoco.id,
       itemId: chocoResponse.body.id
     }
     const iphoneZombieItem = {
-      userId: 'user-with-phone-id',
+      userId: zombieWithPhone.id,
       itemId: iphoneResponse.body.id
     }
     await server.post('/zombies-items').send(chocoZombieItem)
@@ -207,8 +228,9 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombie = await createZombie()
 
-    const newZombieItem = { userId: '1qaz2wx', itemId: itemResponse.body.id }
+    const newZombieItem = { userId: zombie.id, itemId: itemResponse.body.id }
     const postResponse = await server.post('/zombies-items').send(newZombieItem)
 
     const createdZombieItemId = postResponse.body.id
@@ -228,7 +250,8 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
-    const newZombieItem = { userId: '2wsx3edc', itemId: itemResponse.body.id }
+    const zombie = await createZombie()
+    const newZombieItem = { userId: zombie.id, itemId: itemResponse.body.id }
     await server.post('/zombies-items').send(newZombieItem)
 
     const response = await server.get(`/zombies-items/wrong-id`)
@@ -264,17 +287,20 @@ describe('zombies-items', () => {
       code: 'EUR'
     })
 
-    await server
-      .post('/zombies-items')
-      .send({ userId: 'user-1-id', itemId: chocoItem.body.id })
+    const zombie1 = await createZombie({ id: 'user-1-id' })
+    const zombie2 = await createZombie({ id: 'user-2-id' })
 
     await server
       .post('/zombies-items')
-      .send({ userId: 'user-1-id', itemId: iphoneItem.body.id })
+      .send({ userId: zombie1.id, itemId: chocoItem.body.id })
 
     await server
       .post('/zombies-items')
-      .send({ userId: 'user-2-id', itemId: iphoneItem.body.id })
+      .send({ userId: zombie1.id, itemId: iphoneItem.body.id })
+
+    await server
+      .post('/zombies-items')
+      .send({ userId: zombie2.id, itemId: iphoneItem.body.id })
 
     const firstUserItemsSum = await server.get(
       '/zombies-items/user-1-id/price-sum'
@@ -298,8 +324,9 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombie = await createZombie()
 
-    const newZombieItem = { userId: '2wsx3edc', itemId: itemResponse.body.id }
+    const newZombieItem = { userId: zombie.id, itemId: itemResponse.body.id }
     const postResponse = await server.post('/zombies-items').send(newZombieItem)
 
     const getResponse = await server.get('/zombies-items')
@@ -320,9 +347,10 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombie = await createZombie()
 
     const newZombieItem = {
-      userId: '2wsx3edc',
+      userId: zombie.id,
       itemId: itemResponse.body.id,
       uselessProperty: 'useless value'
     }
@@ -341,13 +369,22 @@ describe('zombies-items', () => {
     const wrongPropertyResponse = await server
       .post('/zombies-items')
       .send({ wrongProperty: 'Wrong element' })
+
+    const zombie = await createZombie()
+    const item = await createItem()
+
     const wrongItemId = await server
       .post('/zombies-items')
-      .send({ itemId: 'wring-id', userId: 'user-id' })
+      .send({ itemId: 'wring-id', userId: zombie.id })
+
+    const wrongUserId = await server
+      .post('/zombies-items')
+      .send({ itemId: item.id, userId: 'wrong-id' })
 
     expect(emptyObjectResponse.status).toBe(400)
     expect(wrongPropertyResponse.status).toBe(400)
     expect(wrongItemId.status).toBe(404)
+    expect(wrongUserId.status).toBe(404)
   })
 
   it('DELETE /zombies-items delete all zombies', async () => {
@@ -355,8 +392,9 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombie = await createZombie()
 
-    const newZombieItem = { userId: '2wsx3edc', itemId: itemResponse.body.id }
+    const newZombieItem = { userId: zombie.id, itemId: itemResponse.body.id }
     await server.post('/zombies-items').send(newZombieItem)
 
     const beforeDeleteGetResponse = await server.get('/zombies-items')
@@ -373,8 +411,9 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombie = await createZombie()
 
-    const newZombieItem = { userId: '2wsx3edc', itemId: itemResponse.body.id }
+    const newZombieItem = { userId: zombie.id, itemId: itemResponse.body.id }
 
     // To be sure that we are going to remove only one element we need at least 2 items in the DB
     await server.post('/zombies-items').send(newZombieItem)
@@ -400,8 +439,9 @@ describe('zombies-items', () => {
       price: 100,
       name: 'Chocolate'
     })
+    const zombie = await createZombie()
 
-    const newZombieItem = { userId: '2wsx3edc', itemId: itemResponse.body.id }
+    const newZombieItem = { userId: zombie.id, itemId: itemResponse.body.id }
     await server.post('/zombies-items').send(newZombieItem)
 
     const beforeDeleteGetResponse = await server.get('/zombies-items')

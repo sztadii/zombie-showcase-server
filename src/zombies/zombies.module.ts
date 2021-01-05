@@ -4,6 +4,7 @@ import { ZombiesService } from './services/zombies.service'
 
 @Module({
   controllers: [ZombiesController],
-  providers: [ZombiesService]
+  providers: [ZombiesService],
+  exports: [ZombiesService]
 })
 export class ZombiesModule {}
