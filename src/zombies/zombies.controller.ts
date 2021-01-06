@@ -11,10 +11,14 @@ import {
 } from '@nestjs/common'
 import { ZombiesService } from './services/zombies.service'
 import { ZombieDTO } from './zombies.model'
+import { ZombiesItemsService } from '../zombies-items/services/zombies-items.service'
 
 @Controller('zombies')
 export class ZombiesController {
-  constructor(private readonly zombiesService: ZombiesService) {}
+  constructor(
+    private readonly zombiesService: ZombiesService,
+    private readonly zombiesItemsService: ZombiesItemsService
+  ) {}
 
   @Get()
   findAllZombies() {
@@ -45,13 +49,28 @@ export class ZombiesController {
   }
 
   @Delete()
-  deleteAllZombies() {
-    return this.zombiesService.deleteAll()
+  async deleteAllZombies() {
+    return Promise.all([
+      this.zombiesItemsService.deleteAll(),
+      this.zombiesService.deleteAll()
+    ])
   }
 
   @Delete(':id')
   async deleteZombie(@Param('id') id: string) {
     await this.getZombie(id)
+
+    const userZombieItems = await this.zombiesItemsService.find({
+      fieldPath: 'userId',
+      opStr: '==',
+      value: id
+    })
+
+    await Promise.all(
+      userZombieItems.map((zombieItem) =>
+        this.zombiesItemsService.delete(zombieItem.id)
+      )
+    )
 
     return this.zombiesService.delete(id)
   }

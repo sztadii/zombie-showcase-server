@@ -14,6 +14,7 @@ import { ZombiesService } from '../zombies/services/zombies.service'
     CurrencyRatesService,
     ZombiesService
   ],
-  imports: [ZombiesService]
+  imports: [ZombiesService],
+  exports: [ZombiesItemsService]
 })
 export class ZombiesItemsModule {}

@@ -23,7 +23,7 @@ export class CRUDService<T, E = T & CRUDDocument> {
     this.collection = this.firestore.collection(collectionName)
   }
 
-  transformDocument(
+  private transformDocument(
     document: FirebaseFirestore.DocumentSnapshot<DocumentData>
   ) {
     const documentData = document.data() as E
