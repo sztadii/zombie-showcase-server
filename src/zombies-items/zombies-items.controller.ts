@@ -6,8 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
-  Post,
-  Query
+  Post
 } from '@nestjs/common'
 import { ZombiesItemsService } from './services/zombies-items.service'
 import { ZombieItemDTO } from './zombies-items.model'
@@ -15,7 +14,7 @@ import { ItemsService } from './services/items.service'
 import { CurrencyRatesService } from './services/currency-rates.service'
 import { ZombiesService } from '../zombies/services/zombies.service'
 
-@Controller('zombies-items')
+@Controller('zombies/:userId/items')
 export class ZombiesItemsController {
   constructor(
     private readonly zombiesItemsService: ZombiesItemsService,
@@ -25,16 +24,12 @@ export class ZombiesItemsController {
   ) {}
 
   @Get()
-  async findAllZombiesItems(@Query('userId') userId: string) {
-    const userZombieItems = await this.zombiesItemsService.find(
-      userId
-        ? {
-            fieldPath: 'userId',
-            opStr: '==',
-            value: userId
-          }
-        : undefined
-    )
+  async findAllZombiesItems(@Param('userId') userId: string) {
+    const userZombieItems = await this.zombiesItemsService.find({
+      fieldPath: 'userId',
+      opStr: '==',
+      value: userId
+    })
 
     // Because we will have max 5 userZombieItems then performance will be ok
     const userZombieItemsWithPrefetchedItem = await Promise.all(
@@ -50,23 +45,7 @@ export class ZombiesItemsController {
     return userZombieItemsWithPrefetchedItem
   }
 
-  @Get(':id')
-  async getZombieItem(@Param('id') id: string) {
-    const zombieItem = await this.zombiesItemsService.get(id)
-
-    if (!zombieItem) {
-      throw new HttpException('Zombie item not found', HttpStatus.NOT_FOUND)
-    }
-
-    const item = await this.itemsService.get(zombieItem.itemId)
-
-    return {
-      ...zombieItem,
-      item
-    }
-  }
-
-  @Get(':userId/price-sum')
+  @Get('price-sum')
   async getZombieItemsPriceSum(@Param('userId') userId: string) {
     const currentZombieItems = await this.findAllZombiesItems(userId)
     const requestedCurrencies = await Promise.all([
@@ -89,6 +68,22 @@ export class ZombiesItemsController {
       .sort((a, b) => a.code.localeCompare(b.code))
 
     return itemsPriceSumInDifferentCurrencies
+  }
+
+  @Get(':id')
+  async getZombieItem(@Param('id') id: string) {
+    const zombieItem = await this.zombiesItemsService.get(id)
+
+    if (!zombieItem) {
+      throw new HttpException('Zombie item not found', HttpStatus.NOT_FOUND)
+    }
+
+    const item = await this.itemsService.get(zombieItem.itemId)
+
+    return {
+      ...zombieItem,
+      item
+    }
   }
 
   @Post()
@@ -117,11 +112,6 @@ export class ZombiesItemsController {
     }
 
     return this.zombiesItemsService.create(zombieItem)
-  }
-
-  @Delete()
-  deleteAllZombiesItems() {
-    return this.zombiesItemsService.deleteAll()
   }
 
   @Delete(':id')

@@ -1,7 +1,10 @@
 import { cleanDatabase, getServer, Server } from './test-utils'
 import * as nock from 'nock'
 import { ZombieDTO } from '../src/zombies/zombies.model'
-import { ItemDTO } from '../src/zombies-items/zombies-items.model'
+import {
+  ItemDTO,
+  ZombieItemDTO
+} from '../src/zombies-items/zombies-items.model'
 
 describe('zombies-items', () => {
   let server: Server
@@ -28,6 +31,15 @@ describe('zombies-items', () => {
     }
     const itemResponse = await server.post('/external/items').send(newItem)
     return itemResponse.body
+  }
+
+  async function createZombieItem(
+    zombieItem?: Partial<ZombieItemDTO>
+  ): Promise<ZombieItemDTO> {
+    const zombieItemResponse = await server
+      .post(`/zombies/${zombieItem.userId}/items`)
+      .send(zombieItem)
+    return zombieItemResponse.body
   }
 
   it('POST /external will fetch and save all external resources', async () => {
@@ -153,33 +165,7 @@ describe('zombies-items', () => {
     expect(wrongTypeResponse.status).toBe(400)
   })
 
-  it('GET /zombies-items return empty list of when zombies collection is empty', async () => {
-    const response = await server.get('/zombies-items')
-
-    expect(response.status).toBe(200)
-    expect(response.body).toHaveLength(0)
-  })
-
-  it('GET /zombies-items return list of when zombies collection is filled', async () => {
-    const item = await createItem({
-      price: 100,
-      name: 'Chocolate'
-    })
-    const zombie = await createZombie({ id: '1qaz2wx' })
-
-    const newZombieItem = { userId: zombie.id, itemId: item.id }
-    await server.post('/zombies-items').send(newZombieItem)
-
-    const response = await server.get('/zombies-items')
-
-    expect(response.status).toBe(200)
-    expect(response.body).toHaveLength(1)
-    expect(response.body[0]).toHaveProperty('item')
-    expect(response.body[0].item).toHaveProperty('name', 'Chocolate')
-    expect(response.body[0].item).toHaveProperty('price', 100)
-  })
-
-  it('GET /zombies-items return items list for particular user', async () => {
+  it('GET /zombies/:userId/items return items list for particular user', async () => {
     const chocoItem = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -200,12 +186,10 @@ describe('zombies-items', () => {
       userId: zombieWithPhone.id,
       itemId: iphoneItem.id
     }
-    await server.post('/zombies-items').send(chocoZombieItem)
-    await server.post('/zombies-items').send(iphoneZombieItem)
+    await createZombieItem(chocoZombieItem)
+    await createZombieItem(iphoneZombieItem)
 
-    const response = await server.get(
-      '/zombies-items?userId=user-with-phone-id'
-    )
+    const response = await server.get('/zombies/user-with-phone-id/items')
 
     expect(response.status).toBe(200)
     expect(response.body).toHaveLength(1)
@@ -214,16 +198,16 @@ describe('zombies-items', () => {
     expect(response.body[0].item).toHaveProperty('price', 5000)
   })
 
-  it('GET /zombies-items do not throw an error when items list is empty for particular user', async () => {
-    const response = await server.get(
-      '/zombies-items?userId=user-with-phone-id'
-    )
+  it('GET /zombies/:userId/items do not throw an error when items list is empty for particular user', async () => {
+    const zombie = await createZombie()
+
+    const response = await server.get(`/zombies/${zombie.id}/items`)
 
     expect(response.status).toBe(200)
     expect(response.body).toHaveLength(0)
   })
 
-  it('GET /zombies-items/:id return zombie', async () => {
+  it('GET /zombies/:userId/items/:id return zombie item', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -231,11 +215,13 @@ describe('zombies-items', () => {
     const zombie = await createZombie()
 
     const newZombieItem = { userId: zombie.id, itemId: item.id }
-    const postResponse = await server.post('/zombies-items').send(newZombieItem)
+    const zombieItem = await createZombieItem(newZombieItem)
 
-    const createdZombieItemId = postResponse.body.id
+    const createdZombieItemId = zombieItem.id
 
-    const response = await server.get(`/zombies-items/${createdZombieItemId}`)
+    const response = await server.get(
+      `/zombies/${zombie.id}/items/${createdZombieItemId}`
+    )
 
     expect(response.status).toBe(200)
     expect(response.body).toHaveProperty('userId', newZombieItem.userId)
@@ -245,22 +231,22 @@ describe('zombies-items', () => {
     expect(response.body.item).toHaveProperty('price', 100)
   })
 
-  it('GET /zombies/:id throw an error when id is wrong', async () => {
+  it('GET /zombies/:userId/items/:id throw an error when id is wrong', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
     })
     const zombie = await createZombie()
     const newZombieItem = { userId: zombie.id, itemId: item.id }
-    await server.post('/zombies-items').send(newZombieItem)
+    await createZombieItem(newZombieItem)
 
-    const response = await server.get(`/zombies-items/wrong-id`)
+    const response = await server.get(`/zombies/${zombie.id}/items/wrong-id`)
 
     expect(response.status).toBe(404)
     expect(response.body).toHaveProperty('message', 'Zombie item not found')
   })
 
-  it('GET /zombies-items/:userId/price-sum return price sum of items in few different currencies', async () => {
+  it('GET /zombies/:userId/items/price-sum return price sum of items in few different currencies', async () => {
     const chocoItem = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -290,20 +276,12 @@ describe('zombies-items', () => {
     const zombie1 = await createZombie({ id: 'user-1-id' })
     const zombie2 = await createZombie({ id: 'user-2-id' })
 
-    await server
-      .post('/zombies-items')
-      .send({ userId: zombie1.id, itemId: chocoItem.id })
-
-    await server
-      .post('/zombies-items')
-      .send({ userId: zombie1.id, itemId: iphoneItem.id })
-
-    await server
-      .post('/zombies-items')
-      .send({ userId: zombie2.id, itemId: iphoneItem.id })
+    await createZombieItem({ userId: zombie1.id, itemId: chocoItem.id })
+    await createZombieItem({ userId: zombie1.id, itemId: iphoneItem.id })
+    await createZombieItem({ userId: zombie2.id, itemId: iphoneItem.id })
 
     const firstUserItemsSum = await server.get(
-      '/zombies-items/user-1-id/price-sum'
+      '/zombies/user-1-id/items/price-sum'
     )
 
     expect(firstUserItemsSum.status).toBe(200)
@@ -319,7 +297,7 @@ describe('zombies-items', () => {
     ])
   })
 
-  it('POST /zombies-items create new zombie-item document', async () => {
+  it('POST /zombies/:userId/items create new zombie-item document', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -327,9 +305,11 @@ describe('zombies-items', () => {
     const zombie = await createZombie()
 
     const newZombieItem = { userId: zombie.id, itemId: item.id }
-    const postResponse = await server.post('/zombies-items').send(newZombieItem)
+    const postResponse = await server
+      .post(`/zombies/${zombie.id}/items`)
+      .send(newZombieItem)
 
-    const getResponse = await server.get('/zombies-items')
+    const getResponse = await server.get(`/zombies/${zombie.id}/items`)
 
     expect(postResponse.status).toBe(201)
     expect(postResponse.body).toHaveProperty('userId', newZombieItem.userId)
@@ -342,7 +322,7 @@ describe('zombies-items', () => {
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
-  it('POST /zombies-items create new zombie-item document and do not save useless properties sent by client', async () => {
+  it('POST /zombies/:userId/items create new zombie-item document and do not save useless properties sent by client', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -354,9 +334,11 @@ describe('zombies-items', () => {
       itemId: item.id,
       uselessProperty: 'useless value'
     }
-    const postResponse = await server.post('/zombies-items').send(newZombieItem)
+    const postResponse = await server
+      .post(`/zombies/${zombie.id}/items`)
+      .send(newZombieItem)
 
-    const getResponse = await server.get('/zombies-items')
+    const getResponse = await server.get(`/zombies/${zombie.id}/items`)
 
     expect(postResponse.status).toBe(201)
     expect(getResponse.status).toBe(200)
@@ -364,21 +346,24 @@ describe('zombies-items', () => {
     expect(getResponse.body[0]).not.toHaveProperty('uselessProperty')
   })
 
-  it('POST /zombies-items throw an validation error during zombie item creation', async () => {
-    const emptyObjectResponse = await server.post('/zombies-items').send({})
-    const wrongPropertyResponse = await server
-      .post('/zombies-items')
-      .send({ wrongProperty: 'Wrong element' })
-
+  it('POST /zombies/:userId/items throw an validation error during zombie item creation', async () => {
     const zombie = await createZombie()
     const item = await createItem()
 
+    const emptyObjectResponse = await server
+      .post(`/zombies/${zombie.id}/items`)
+      .send({})
+
+    const wrongPropertyResponse = await server
+      .post(`/zombies/${zombie.id}/items`)
+      .send({ wrongProperty: 'Wrong element' })
+
     const wrongItemId = await server
-      .post('/zombies-items')
+      .post(`/zombies/${zombie.id}/items`)
       .send({ itemId: 'wring-id', userId: zombie.id })
 
     const wrongUserId = await server
-      .post('/zombies-items')
+      .post(`/zombies/${zombie.id}/items`)
       .send({ itemId: item.id, userId: 'wrong-id' })
 
     expect(emptyObjectResponse.status).toBe(400)
@@ -387,21 +372,19 @@ describe('zombies-items', () => {
     expect(wrongUserId.status).toBe(404)
   })
 
-  it('POST /zombies-items throw an error if we want to add new item for zombie who has already 5 items', async () => {
+  it('POST /zombies/:userId/items throw an error if we want to add new item for zombie who has already 5 items', async () => {
     const zombie = await createZombie()
 
     for (let i = 0; i < 5; i++) {
       const item = await createItem()
 
-      await server
-        .post('/zombies-items')
-        .send({ itemId: item.id, userId: zombie.id })
+      await createZombieItem({ itemId: item.id, userId: zombie.id })
     }
 
     const notAllowedItem = await createItem()
 
     const notAllowedZombieItem = await server
-      .post('/zombies-items')
+      .post(`/zombies/${zombie.id}/items`)
       .send({ itemId: notAllowedItem.id, userId: zombie.id })
 
     expect(notAllowedZombieItem.status).toBe(400)
@@ -410,26 +393,7 @@ describe('zombies-items', () => {
     )
   })
 
-  it('DELETE /zombies-items delete all zombies', async () => {
-    const item = await createItem({
-      price: 100,
-      name: 'Chocolate'
-    })
-    const zombie = await createZombie()
-
-    const newZombieItem = { userId: zombie.id, itemId: item.id }
-    await server.post('/zombies-items').send(newZombieItem)
-
-    const beforeDeleteGetResponse = await server.get('/zombies-items')
-    const deleteResponse = await server.delete(`/zombies-items`)
-    const afterDeleteGetResponse = await server.get('/zombies-items')
-
-    expect(deleteResponse.status).toBe(200)
-    expect(beforeDeleteGetResponse.body).toHaveLength(1)
-    expect(afterDeleteGetResponse.body).toHaveLength(0)
-  })
-
-  it('DELETE /zombies-items/:id allows to delete the zombie item', async () => {
+  it('DELETE /zombies/:userid/items/:id allows to delete the zombie item', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -439,39 +403,46 @@ describe('zombies-items', () => {
     const newZombieItem = { userId: zombie.id, itemId: item.id }
 
     // To be sure that we are going to remove only one element we need at least 2 items in the DB
-    await server.post('/zombies-items').send(newZombieItem)
-    const postResponse = await server.post('/zombies-items').send(newZombieItem)
+    await createZombieItem(newZombieItem)
+    const zombieItem = await createZombieItem(newZombieItem)
 
-    const createdZombieId = postResponse.body.id
+    const createdZombieId = zombieItem.id
 
-    const beforeDeleteGetResponse = await server.get('/zombies-items')
-
-    const deleteResponse = await server.delete(
-      `/zombies-items/${createdZombieId}`
+    const beforeDeleteGetResponse = await server.get(
+      `/zombies/${zombie.id}/items`
     )
 
-    const afterDeleteGetResponse = await server.get('/zombies-items')
+    const deleteResponse = await server.delete(
+      `/zombies/${zombie.id}/items/${createdZombieId}`
+    )
+
+    const afterDeleteGetResponse = await server.get(
+      `/zombies/${zombie.id}/items`
+    )
 
     expect(deleteResponse.status).toBe(200)
     expect(beforeDeleteGetResponse.body).toHaveLength(2)
     expect(afterDeleteGetResponse.body).toHaveLength(1)
   })
 
-  it('DELETE /zombies-items/:id throw an error when id is wrong', async () => {
+  it('DELETE /zombies/:userId/items/:id throw an error when id is wrong', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
     })
     const zombie = await createZombie()
 
-    const newZombieItem = { userId: zombie.id, itemId: item.id }
-    await server.post('/zombies-items').send(newZombieItem)
+    await createZombieItem({ userId: zombie.id, itemId: item.id })
 
-    const beforeDeleteGetResponse = await server.get('/zombies-items')
+    const beforeDeleteGetResponse = await server.get(
+      `/zombies/${zombie.id}/items`
+    )
 
-    const deleteResponse = await server.delete(`/zombies-items/wrong-id`)
+    const deleteResponse = await server.delete('/zombies/wrong-id/items')
 
-    const afterDeleteGetResponse = await server.get('/zombies-items')
+    const afterDeleteGetResponse = await server.get(
+      `/zombies/${zombie.id}/items`
+    )
 
     expect(deleteResponse.status).toBe(404)
     expect(beforeDeleteGetResponse.body).toHaveLength(1)
