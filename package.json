@@ -7,9 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "db": "npm run db:stop && npm run db:run",
-    "db:stop": "docker stop firestore 2> /dev/null|| true && docker rm firestore 2> /dev/null || true",
-    "db:run": "docker run --rm --name firestore -d -p 8080:8080 --env \"FIRESTORE_PROJECT_ID=local-project-id\" --env \"PORT=8080\" mtlynch/firestore-emulator-docker",
+    "db": "docker-compose up -d firestore",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
