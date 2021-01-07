@@ -147,6 +147,11 @@ describe('zombies', () => {
     expect(afterDeleteGetResponse.body).toHaveLength(1)
   })
 
+  // TODO Add missing test case
+  it.todo(
+    'DELETE /zombies/:id allows to delete a zombie and related zombieItems'
+  )
+
   it('DELETE /zombies delete all zombies', async () => {
     await server.post('/zombies').send({ name: 'Tonny "Iron Man" Stark' })
     await server.post('/zombies').send({ name: 'Thor "The Kind of Asgard"' })
