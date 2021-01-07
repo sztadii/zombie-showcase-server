@@ -4,7 +4,7 @@ import { CRUDService } from '../../common/crud.service'
 import {
   CurrencyRateDTO,
   ExchangeRatesServiceResponse
-} from '../zombies-items.model'
+} from '../models/zombies-items.model'
 
 @Injectable()
 export class CurrencyRatesService extends CRUDService<CurrencyRateDTO> {

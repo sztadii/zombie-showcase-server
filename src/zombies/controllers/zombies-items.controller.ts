@@ -8,11 +8,11 @@ import {
   Param,
   Post
 } from '@nestjs/common'
-import { ZombiesItemsService } from './services/zombies-items.service'
-import { ZombieItemDTO } from './zombies-items.model'
-import { ItemsService } from './services/items.service'
-import { CurrencyRatesService } from './services/currency-rates.service'
-import { ZombiesService } from '../zombies/services/zombies.service'
+import { ZombiesItemsService } from '../services/zombies-items.service'
+import { ZombieItemDTO } from '../models/zombies-items.model'
+import { ItemsService } from '../services/items.service'
+import { CurrencyRatesService } from '../services/currency-rates.service'
+import { ZombiesService } from '../services/zombies.service'
 
 @Controller('zombies/:userId/items')
 export class ZombiesItemsController {

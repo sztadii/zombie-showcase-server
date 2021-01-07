@@ -1,10 +1,10 @@
 import { cleanDatabase, getServer, Server } from './test-utils'
 import * as nock from 'nock'
-import { ZombieDTO } from '../src/zombies/zombies.model'
+import { ZombieDTO } from '../src/zombies/models/zombies.model'
 import {
   ItemDTO,
   ZombieItemDTO
-} from '../src/zombies-items/zombies-items.model'
+} from '../src/zombies/models/zombies-items.model'
 
 describe('zombies-items', () => {
   let server: Server

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common'
-import { ItemDTO, CurrencyRateDTO } from './zombies-items.model'
-import { ItemsService } from './services/items.service'
-import { CurrencyRatesService } from './services/currency-rates.service'
+import { ItemDTO, CurrencyRateDTO } from '../models/zombies-items.model'
+import { ItemsService } from '../services/items.service'
+import { CurrencyRatesService } from '../services/currency-rates.service'
 
 @Controller('external')
 export class ExternalController {

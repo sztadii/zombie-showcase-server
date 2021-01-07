@@ -9,9 +9,9 @@ import {
   HttpException,
   HttpStatus
 } from '@nestjs/common'
-import { ZombiesService } from './services/zombies.service'
-import { ZombieDTO } from './zombies.model'
-import { ZombiesItemsService } from '../zombies-items/services/zombies-items.service'
+import { ZombiesService } from '../services/zombies.service'
+import { ZombieDTO } from '../models/zombies.model'
+import { ZombiesItemsService } from '../services/zombies-items.service'
 
 @Controller('zombies')
 export class ZombiesController {
