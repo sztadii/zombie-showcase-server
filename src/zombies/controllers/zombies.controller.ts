@@ -60,11 +60,13 @@ export class ZombiesController {
   async deleteZombie(@Param('id') id: string) {
     await this.getZombie(id)
 
-    const userZombieItems = await this.zombiesItemsService.find({
-      fieldPath: 'userId',
-      opStr: '==',
-      value: id
-    })
+    const userZombieItems = await this.zombiesItemsService.find([
+      {
+        fieldPath: 'userId',
+        opStr: '==',
+        value: id
+      }
+    ])
 
     await Promise.all(
       userZombieItems.map((zombieItem) =>
