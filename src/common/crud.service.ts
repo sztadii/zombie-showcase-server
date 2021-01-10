@@ -9,14 +9,22 @@ import { v4 as uuid } from 'uuid'
 import { CRUDDocument } from './crud.model'
 
 type FindParam = {
+  /**
+   * Field path for example userId
+   * */
   fieldPath: string | FieldPath
+  /**
+   * Filter conditions in a `Query.where()` clause are specified using the
+   * strings '<', '<=', '==', '!=', '>=', '>', 'array-contains', 'in', 'not-in',
+   * and 'array-contains-any'.
+   */
   opStr: WhereFilterOp
   value: any
 }
 
 export class CRUDService<T, E = T & CRUDDocument> {
-  private firestore: Firestore
-  private collection: CollectionReference<DocumentData>
+  private readonly firestore: Firestore
+  private readonly collection: CollectionReference<DocumentData>
 
   constructor(collectionName: string) {
     this.firestore = new Firestore()
@@ -59,13 +67,14 @@ export class CRUDService<T, E = T & CRUDDocument> {
     await Promise.all(allEntitiesPromise)
   }
 
-  // TODO Make params array
-  async find(param?: FindParam): Promise<E[]> {
-    const documents = param
-      ? await this.collection
-          .where(param.fieldPath, param.opStr, param.value)
-          .get()
-      : await this.collection.get()
+  async find(param?: FindParam[]): Promise<E[]> {
+    const query = param
+      ? param.reduce((query, param) => {
+          return query.where(param.fieldPath, param.opStr, param.value)
+        }, this.collection)
+      : this.collection
+
+    const documents = await query.get()
 
     return documents.docs.map((document) => {
       return this.transformDocument(document)
