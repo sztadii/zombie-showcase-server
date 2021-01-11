@@ -7,11 +7,13 @@ import {
   Post,
   Patch,
   HttpException,
-  HttpStatus
+  HttpStatus,
+  Query
 } from '@nestjs/common'
 import { ZombiesService } from '../services/zombies.service'
 import { ZombieDTO } from '../models/zombies.model'
 import { ZombiesItemsService } from '../services/zombies-items.service'
+import { PaginationDTO } from '../../common/pagination.model'
 
 @Controller('zombies')
 export class ZombiesController {
@@ -21,8 +23,12 @@ export class ZombiesController {
   ) {}
 
   @Get()
-  findAllZombies() {
-    return this.zombiesService.find()
+  findAllZombies(@Query() query: PaginationDTO) {
+    const { limit, skip } = query
+    return this.zombiesService.find({
+      limit: Number(limit) || undefined,
+      skip: Number(skip) || undefined
+    })
   }
 
   @Get(':id')
@@ -60,13 +66,15 @@ export class ZombiesController {
   async deleteZombie(@Param('id') id: string) {
     await this.getZombie(id)
 
-    const userZombieItems = await this.zombiesItemsService.find([
-      {
-        fieldPath: 'userId',
-        opStr: '==',
-        value: id
-      }
-    ])
+    const userZombieItems = await this.zombiesItemsService.find({
+      queryParams: [
+        {
+          fieldPath: 'userId',
+          opStr: '==',
+          value: id
+        }
+      ]
+    })
 
     await Promise.all(
       userZombieItems.map((zombieItem) =>
