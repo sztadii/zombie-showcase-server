@@ -7,7 +7,8 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: zombie-showcase-server
+  SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
+  SERVICE_REGION: ${{ secrets.GCP_SERVICE_REGION }}
 
 jobs:
   build_deploy:
@@ -30,4 +31,4 @@ jobs:
           gcloud run deploy $SERVICE_NAME \
             --image=gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
             --platform=managed \
-            --region=europe-west3
+            --region=$SERVICE_REGION
