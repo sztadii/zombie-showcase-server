@@ -9,4 +9,8 @@ export class PaginationDTO {
   @IsOptional()
   @IsString()
   skip?: string
+
+  @IsOptional()
+  @IsString()
+  orderBy?: string
 }
