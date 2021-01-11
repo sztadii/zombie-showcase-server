@@ -84,7 +84,7 @@ export class CRUDService<T, E = T & CRUDDocument> {
   async find(args?: FindArgs): Promise<E[]> {
     const { queryParams, limit = 10, skip = 0, orderBy = 'createdAt' } =
       args || {}
-    let query = queryParams
+    const query = queryParams
       ? queryParams.reduce((query, param) => {
           return query.where(param.fieldPath, param.opStr, param.value)
         }, this.collection)
