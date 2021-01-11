@@ -65,6 +65,7 @@ export class CRUDService<T, E = T & CRUDDocument> {
     const elementId = id.toString()
     const newDocument = {
       ...entity,
+      id: elementId,
       createdAt: new Date().toISOString()
     }
     await this.collection.doc(elementId).set(newDocument)
