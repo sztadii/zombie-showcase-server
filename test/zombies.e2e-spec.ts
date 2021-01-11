@@ -19,15 +19,30 @@ describe('zombies', () => {
     expect(response.body).toHaveLength(0)
   })
 
-  it('GET /zombies return an list of zombies when zombies collection is filled', async () => {
-    await server.post('/zombies').send(basicZombie)
+  it('GET /zombies return an list of zombies ordered by creation time', async () => {
+    const firstZombie = {
+      name: 'Capitan America'
+    }
+    const secondZombie = {
+      name: 'Tonny "Iron Man" Stark'
+    }
+    const thirdZombie = {
+      name: 'Spider Man'
+    }
+    await server.post('/zombies').send(firstZombie)
+    await server.post('/zombies').send(secondZombie)
+    await server.post('/zombies').send(thirdZombie)
 
     const getResponse = await server.get('/zombies')
 
     expect(getResponse.status).toBe(200)
-    expect(getResponse.body).toHaveLength(1)
-    expect(getResponse.body[0]).toHaveProperty('name', basicZombie.name)
+    expect(getResponse.body).toHaveLength(3)
+
     expect(getResponse.body[0]).toHaveProperty('createdAt')
+
+    expect(getResponse.body[0]).toHaveProperty('name', firstZombie.name)
+    expect(getResponse.body[1]).toHaveProperty('name', secondZombie.name)
+    expect(getResponse.body[2]).toHaveProperty('name', thirdZombie.name)
   })
 
   it('GET /zombies allow to reduce number of returned zombie via limit and skip params', async () => {

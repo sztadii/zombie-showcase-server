@@ -48,8 +48,7 @@ export class CRUDService<T, E = T & CRUDDocument> {
     const documentData = document.data() as E
     return {
       ...documentData,
-      id: document.id,
-      createdAt: document.createTime.toDate()
+      id: document.id
     }
   }
 
@@ -64,7 +63,11 @@ export class CRUDService<T, E = T & CRUDDocument> {
   async create(entity): Promise<E> {
     const { id = uuid() } = entity
     const elementId = id.toString()
-    await this.collection.doc(elementId).set(entity)
+    const newDocument = {
+      ...entity,
+      createdAt: new Date().toISOString()
+    }
+    await this.collection.doc(elementId).set(newDocument)
     return this.get(elementId)
   }
 
@@ -79,7 +82,7 @@ export class CRUDService<T, E = T & CRUDDocument> {
   }
 
   async find(args?: FindArgs): Promise<E[]> {
-    const { queryParams, limit = 10, skip = 0, orderBy = 'createTime' } =
+    const { queryParams, limit = 10, skip = 0, orderBy = 'createdAt' } =
       args || {}
     let query = queryParams
       ? queryParams.reduce((query, param) => {
@@ -87,11 +90,11 @@ export class CRUDService<T, E = T & CRUDDocument> {
         }, this.collection)
       : this.collection
 
-    if (orderBy) {
-      query.orderBy(orderBy)
-    }
-
-    const documents = await query.limit(limit).offset(skip).get()
+    const documents = await query
+      .orderBy(orderBy, 'asc')
+      .limit(limit)
+      .offset(skip)
+      .get()
 
     return documents.docs.map((document) => {
       return this.transformDocument(document)
