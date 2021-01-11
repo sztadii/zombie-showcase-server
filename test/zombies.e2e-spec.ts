@@ -30,6 +30,34 @@ describe('zombies', () => {
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
+  it('GET /zombies allow to reduce number of returned zombie via limit and skip params', async () => {
+    const firstZombie = {
+      name: 'Capitan America'
+    }
+    const secondZombie = {
+      name: 'Tonny "Iron Man" Stark'
+    }
+    const thirdZombie = {
+      name: 'Spider Man'
+    }
+    await server.post('/zombies').send(firstZombie)
+    await server.post('/zombies').send(secondZombie)
+    await server.post('/zombies').send(thirdZombie)
+
+    const getResponse = await server.get('/zombies')
+    const getResponseWithLimitParam = await server.get('/zombies?limit=1')
+    const getResponseWithSkipParam = await server.get('/zombies?skip=1')
+    const getResponseWithLimitAndSkipParam = await server.get(
+      '/zombies?limit=1&skip=2'
+    )
+
+    // TODO Fix problem with random order later and then check if items are correct
+    expect(getResponse.body).toHaveLength(3)
+    expect(getResponseWithLimitParam.body).toHaveLength(1)
+    expect(getResponseWithSkipParam.body).toHaveLength(2)
+    expect(getResponseWithLimitAndSkipParam.body).toHaveLength(1)
+  })
+
   it('GET /zombies/:id return single zombie', async () => {
     const postResponse = await server.post('/zombies').send(basicZombie)
 

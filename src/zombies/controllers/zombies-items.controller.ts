@@ -25,13 +25,15 @@ export class ZombiesItemsController {
 
   @Get()
   async findAllZombiesItems(@Param('userId') userId: string) {
-    const userZombieItems = await this.zombiesItemsService.find([
-      {
-        fieldPath: 'userId',
-        opStr: '==',
-        value: userId
-      }
-    ])
+    const userZombieItems = await this.zombiesItemsService.find({
+      queryParams: [
+        {
+          fieldPath: 'userId',
+          opStr: '==',
+          value: userId
+        }
+      ]
+    })
 
     // Because we will have max 5 userZombieItems then performance will be ok
     const userZombieItemsWithPrefetchedItem = await Promise.all(

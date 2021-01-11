@@ -7,7 +7,14 @@ import {
 } from '@google-cloud/firestore'
 import { v4 as uuid } from 'uuid'
 
-type FindParam = {
+type FindArgs = {
+  limit?: number
+  skip?: number
+  orderBy?: string
+  queryParams?: QueryParam[]
+}
+
+type QueryParam = {
   /**
    * Field path for example userId
    * */
@@ -71,14 +78,20 @@ export class CRUDService<T, E = T & CRUDDocument> {
     await Promise.all(allEntitiesPromise)
   }
 
-  async find(param?: FindParam[]): Promise<E[]> {
-    const query = param
-      ? param.reduce((query, param) => {
+  async find(args?: FindArgs): Promise<E[]> {
+    const { queryParams, limit = 10, skip = 0, orderBy = 'createTime' } =
+      args || {}
+    let query = queryParams
+      ? queryParams.reduce((query, param) => {
           return query.where(param.fieldPath, param.opStr, param.value)
         }, this.collection)
       : this.collection
 
-    const documents = await query.get()
+    if (orderBy) {
+      query.orderBy(orderBy)
+    }
+
+    const documents = await query.limit(limit).offset(skip).get()
 
     return documents.docs.map((document) => {
       return this.transformDocument(document)
