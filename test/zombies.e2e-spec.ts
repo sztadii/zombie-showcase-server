@@ -2,6 +2,7 @@ import { cleanDatabase, getServer, Server } from './test-utils'
 
 describe('zombies', () => {
   let server: Server
+  const basicZombie = { name: 'Tonny "Iron Man" Stark' }
 
   beforeAll(async () => {
     server = await getServer()
@@ -19,27 +20,25 @@ describe('zombies', () => {
   })
 
   it('GET /zombies return an list of zombies when zombies collection is filled', async () => {
-    const newZombie = { name: 'Tonny "Iron Man" Stark' }
-    await server.post('/zombies').send(newZombie)
+    await server.post('/zombies').send(basicZombie)
 
     const getResponse = await server.get('/zombies')
 
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
-    expect(getResponse.body[0]).toHaveProperty('name', newZombie.name)
+    expect(getResponse.body[0]).toHaveProperty('name', basicZombie.name)
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
   it('GET /zombies/:id return single zombie', async () => {
-    const newZombie = { name: 'Tonny "Iron Man" Stark' }
-    const postResponse = await server.post('/zombies').send(newZombie)
+    const postResponse = await server.post('/zombies').send(basicZombie)
 
     const createdZombieId = postResponse.body.id
 
     const response = await server.get(`/zombies/${createdZombieId}`)
 
     expect(response.status).toBe(200)
-    expect(response.body).toHaveProperty('name', newZombie.name)
+    expect(response.body).toHaveProperty('name', basicZombie.name)
     expect(response.body).toHaveProperty('createdAt')
   })
 
@@ -53,17 +52,16 @@ describe('zombies', () => {
   })
 
   it('POST /zombies create new zombie', async () => {
-    const newZombie = { name: 'Capitan America' }
-    const postResponse = await server.post('/zombies').send(newZombie)
+    const postResponse = await server.post('/zombies').send(basicZombie)
 
     const getResponse = await server.get('/zombies')
 
     expect(postResponse.status).toBe(201)
-    expect(postResponse.body).toHaveProperty('name', newZombie.name)
+    expect(postResponse.body).toHaveProperty('name', basicZombie.name)
 
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
-    expect(getResponse.body[0]).toHaveProperty('name', newZombie.name)
+    expect(getResponse.body[0]).toHaveProperty('name', basicZombie.name)
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
@@ -129,11 +127,9 @@ describe('zombies', () => {
   })
 
   it('DELETE /zombies/:id allows to delete a zombie', async () => {
-    const newZombie = { name: 'Tonny "Iron Man" Stark updated' }
-
     // To be sure that we are going to remove only one element we need at least 2 zombies in the DB
-    await server.post('/zombies').send(newZombie)
-    const postResponse = await server.post('/zombies').send(newZombie)
+    await server.post('/zombies').send(basicZombie)
+    const postResponse = await server.post('/zombies').send(basicZombie)
     const createdZombieId = postResponse.body.id
 
     const beforeDeleteGetResponse = await server.get('/zombies')
