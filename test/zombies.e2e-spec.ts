@@ -45,6 +45,20 @@ describe('zombies', () => {
     expect(getResponse.body[2]).toHaveProperty('name', thirdZombie.name)
   })
 
+  it('GET /zombies return an list of zombies and allow to order it by orderBy param', async () => {
+    await server.post('/zombies').send({
+      name: 'Spider Man'
+    })
+    await server.post('/zombies').send({
+      name: 'Capitan America'
+    })
+
+    const getResponse = await server.get('/zombies?orderBy=name')
+
+    expect(getResponse.body[0]).toHaveProperty('name', 'Capitan America')
+    expect(getResponse.body[1]).toHaveProperty('name', 'Spider Man')
+  })
+
   it('GET /zombies allow to reduce number of returned zombie via limit and skip params', async () => {
     const firstZombie = {
       name: 'Capitan America'

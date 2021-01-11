@@ -24,10 +24,11 @@ export class ZombiesController {
 
   @Get()
   findAllZombies(@Query() query: PaginationDTO) {
-    const { limit, skip } = query
+    const { limit, skip, orderBy } = query
     return this.zombiesService.find({
       limit: Number(limit) || undefined,
-      skip: Number(skip) || undefined
+      skip: Number(skip) || undefined,
+      orderBy
     })
   }
 
