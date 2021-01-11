@@ -66,11 +66,22 @@ describe('zombies', () => {
       '/zombies?limit=1&skip=2'
     )
 
-    // TODO Fix problem with random order later and then check if items are correct
     expect(getResponse.body).toHaveLength(3)
     expect(getResponseWithLimitParam.body).toHaveLength(1)
+    expect(getResponseWithLimitParam.body[0]).toHaveProperty(
+      'name',
+      firstZombie.name
+    )
     expect(getResponseWithSkipParam.body).toHaveLength(2)
+    expect(getResponseWithSkipParam.body[0]).toHaveProperty(
+      'name',
+      secondZombie.name
+    )
     expect(getResponseWithLimitAndSkipParam.body).toHaveLength(1)
+    expect(getResponseWithLimitAndSkipParam.body[0]).toHaveProperty(
+      'name',
+      thirdZombie.name
+    )
   })
 
   it('GET /zombies/:id return single zombie', async () => {
