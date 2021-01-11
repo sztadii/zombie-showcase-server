@@ -6,7 +6,6 @@ import {
   WhereFilterOp
 } from '@google-cloud/firestore'
 import { v4 as uuid } from 'uuid'
-import { CRUDDocument } from './crud.model'
 
 type FindParam = {
   /**
@@ -20,6 +19,11 @@ type FindParam = {
    */
   opStr: WhereFilterOp
   value: any
+}
+
+export class CRUDDocument {
+  id: string
+  createdAt: Date
 }
 
 export class CRUDService<T, E = T & CRUDDocument> {
