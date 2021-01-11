@@ -20,6 +20,3 @@ At first please install docker and docker-compose on your machine
 ```
 docker-compose up
 ```
-
-## Other info
-Production version of app is deployed to GCP [LINK](https://zombie-showcase-server-kgptm5ui3q-ey.a.run.app)
