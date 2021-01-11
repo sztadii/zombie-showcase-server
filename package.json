@@ -8,17 +8,17 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "db": "docker-compose up -d firestore",
-    "env-verification": "node env-file-verification.js",
-    "prestart": "npm run env-verification && npm run db",
+    "prestart": "node scripts/check-if-env-file-created.js && npm run db",
     "start": "nest start --watch",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
+    "check-prod": "node scripts/check-if-production-env.js",
     "test": "npm run test:e2e",
-    "test:unit": "jest",
+    "test:unit": "npm run check-prod && jest",
     "test:unit:watch": "jest --watch",
-    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand --detectOpenHandles --silent",
+    "test:e2e": "npm run check-prod && jest --config ./test/jest-e2e.json --runInBand --detectOpenHandles --silent",
     "test:e2e:watch": "npm run test:e2e -- --watch"
   },
   "dependencies": {

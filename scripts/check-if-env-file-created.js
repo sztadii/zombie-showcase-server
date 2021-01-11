@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 
-function envFileVerification() {
+function checkIfEnvFileCreated() {
   if (!fs.existsSync('.env')) {
     console.error('-------')
     console.error('-------')
@@ -15,4 +15,4 @@ function envFileVerification() {
   }
 }
 
-envFileVerification()
+checkIfEnvFileCreated()
