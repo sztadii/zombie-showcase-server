@@ -24,8 +24,8 @@ jobs:
       - name: Linting
         run: npm run lint
 
-      - name: E2E tests
-        run: npm run test:e2e
+      - name: Tests
+        run: npm run test
         env:
           FIRESTORE_EMULATOR_HOST: localhost:8080
           GCLOUD_PROJECT: local-project-id
