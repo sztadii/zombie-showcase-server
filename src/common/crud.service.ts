@@ -68,12 +68,12 @@ export class CRUDService<T, E = T & CRUDDocument> {
       id: elementId,
       createdAt: new Date().toISOString()
     }
-    await this.collection.doc(elementId).set(newDocument)
+    await this.collection.doc(elementId).set({ ...newDocument })
     return this.get(elementId)
   }
 
   async update(id: string, entity): Promise<E> {
-    await this.collection.doc(id).update(entity)
+    await this.collection.doc(id).update({ ...entity })
     return this.get(id)
   }
 
