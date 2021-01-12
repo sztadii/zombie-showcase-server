@@ -15,20 +15,26 @@ jobs:
         with:
           node-version: 12.x
 
-      - name: Run DB locally
-        run: npm run db
-
       - name: Dependency instalation
         run: npm ci
 
       - name: Linting
         run: npm run lint
 
+      - name: Run DB locally
+        run: npm run db
+
       - name: Tests
         run: npm run test
         env:
           FIRESTORE_EMULATOR_HOST: localhost:8080
           GCLOUD_PROJECT: local-project-id
+
+  build-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
 
       # We modify the PORT env to be sure that we still allow to modify our docker container's port
       - name: Building and run docker container
