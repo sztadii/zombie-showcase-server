@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "db": "docker-compose up -d firestore",
-    "prestart": "node scripts/check-if-env-file-created.js && npm run db",
+    "prestart": "node scripts/check-if-env-file-created.js",
     "start": "nest start --watch",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
