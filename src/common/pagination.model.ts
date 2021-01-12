@@ -1,14 +1,13 @@
-import { IsString, IsOptional } from 'class-validator'
+import { IsString, IsNumber, IsOptional } from 'class-validator'
 
-// TODO Transform limit and skip to number
 export class PaginationDTO {
   @IsOptional()
-  @IsString()
-  limit?: string
+  @IsNumber()
+  limit?: number
 
   @IsOptional()
-  @IsString()
-  skip?: string
+  @IsNumber()
+  skip?: number
 
   @IsOptional()
   @IsString()

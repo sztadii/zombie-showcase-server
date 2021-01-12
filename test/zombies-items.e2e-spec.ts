@@ -105,6 +105,7 @@ describe('zombies-items', () => {
     })
 
     expect(response.status).toBe(201)
+    expect(response.body).toHaveProperty('id')
     expect(response.body).toHaveProperty('price', 100)
     expect(response.body).toHaveProperty('name', 'Chocolate')
   })
@@ -139,6 +140,7 @@ describe('zombies-items', () => {
     })
 
     expect(response.status).toBe(201)
+    expect(response.body).toHaveProperty('id')
     expect(response.body).toHaveProperty('currency', 'Dollar')
     expect(response.body).toHaveProperty('code', 'USD')
     expect(response.body).toHaveProperty('bid', 3.65)
@@ -317,8 +319,10 @@ describe('zombies-items', () => {
 
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
+    expect(getResponse.body[0]).toHaveProperty('id')
     expect(getResponse.body[0]).toHaveProperty('userId', newZombieItem.userId)
     expect(getResponse.body[0]).toHaveProperty('itemId', newZombieItem.itemId)
+    expect(getResponse.body[0]).toHaveProperty('item', item)
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 

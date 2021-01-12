@@ -130,6 +130,7 @@ describe('zombies', () => {
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
     expect(getResponse.body[0]).toHaveProperty('name', basicZombie.name)
+    expect(getResponse.body[0]).toHaveProperty('id')
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
