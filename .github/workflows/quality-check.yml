@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  quality-check:
+  check-code-quality:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,7 @@ jobs:
           FIRESTORE_EMULATOR_HOST: localhost:8080
           GCLOUD_PROJECT: local-project-id
 
-  build-image:
+  check-building-image:
     runs-on: ubuntu-latest
 
     steps:
