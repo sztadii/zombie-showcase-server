@@ -14,7 +14,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
-    "check-prod": "node scripts/check-if-production-env.js",
+    "check-prod": "node scripts/check-if-production-is-in-danger.js",
     "test": "npm run test:e2e",
     "test:unit": "npm run check-prod && jest",
     "test:unit:watch": "npm run test:unit -- --watch",
