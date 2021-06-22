@@ -59,7 +59,7 @@ describe('zombies', () => {
     expect(getResponse.body[1]).toHaveProperty('name', 'Spider Man')
   })
 
-  it('GET /zombies allow to reduce number of returned zombie via limit and skip params', async () => {
+  it('GET /zombies allow to reduce number of returned zombie by limit and skip params', async () => {
     const firstZombie = {
       name: 'Capitan America'
     }
