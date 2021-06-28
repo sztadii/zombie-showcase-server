@@ -108,9 +108,9 @@ export class ZombiesItemsController {
 
     const maxAllowedItemsForZombie = 5
     const canCreateNewZombieItem =
-      currentZombieItems.length >= maxAllowedItemsForZombie
+      currentZombieItems.length < maxAllowedItemsForZombie
 
-    if (canCreateNewZombieItem) {
+    if (!canCreateNewZombieItem) {
       const errorMessage = `Zombie can not have more than ${maxAllowedItemsForZombie} items`
       throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST)
     }
