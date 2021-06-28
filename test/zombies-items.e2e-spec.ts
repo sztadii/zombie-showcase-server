@@ -91,11 +91,23 @@ describe('zombies-items', () => {
     )
   })
 
+  it('GET /external/items return status 200 when list has been send without any issues', async () => {
+    const response = await server.get('/external/items')
+    expect(response.status).toBe(200)
+  })
+
   it('GET /external/items return empty list when items collection is empty', async () => {
     const response = await server.get('/external/items')
-
-    expect(response.status).toBe(200)
     expect(response.body).toHaveLength(0)
+  })
+
+  it('POST /external/items return status 201 when item has been created without any issues', async () => {
+    const response = await server.post('/external/items').send({
+      price: 100,
+      name: 'Chocolate'
+    })
+
+    expect(response.status).toBe(201)
   })
 
   it('POST /external/items create and return new item', async () => {
@@ -104,7 +116,6 @@ describe('zombies-items', () => {
       name: 'Chocolate'
     })
 
-    expect(response.status).toBe(201)
     expect(response.body).toHaveProperty('id')
     expect(response.body).toHaveProperty('price', 100)
     expect(response.body).toHaveProperty('name', 'Chocolate')
@@ -129,8 +140,6 @@ describe('zombies-items', () => {
 
   it('GET /external/rates return empty list when rates collection is empty', async () => {
     const response = await server.get('/external/rates')
-
-    expect(response.status).toBe(200)
     expect(response.body).toHaveLength(0)
   })
 
@@ -207,7 +216,7 @@ describe('zombies-items', () => {
     expect(response.body[0].item).toHaveProperty('price', 5000)
   })
 
-  it('GET /zombies/:userId/items do not throw an error when items list is empty for particular user', async () => {
+  it('GET /zombies/:userId/items return empty list when user do not have items', async () => {
     const zombie = await createZombie()
 
     const response = await server.get(`/zombies/${zombie.id}/items`)
@@ -306,7 +315,7 @@ describe('zombies-items', () => {
     ])
   })
 
-  it('POST /zombies/:userId/items create new zombie-item document', async () => {
+  it('POST /zombies/:userId/items create and return new zombie-item', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -333,7 +342,7 @@ describe('zombies-items', () => {
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
-  it('POST /zombies/:userId/items create new zombie-item document and do not save useless properties sent by client', async () => {
+  it('POST /zombies/:userId/items ignore useless properties send by client during creation', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
@@ -345,14 +354,9 @@ describe('zombies-items', () => {
       itemId: item.id,
       uselessProperty: 'useless value'
     }
-    const postResponse = await server
-      .post(`/zombies/${zombie.id}/items`)
-      .send(newZombieItem)
-
+    await server.post(`/zombies/${zombie.id}/items`).send(newZombieItem)
     const getResponse = await server.get(`/zombies/${zombie.id}/items`)
 
-    expect(postResponse.status).toBe(201)
-    expect(getResponse.status).toBe(200)
     expect(getResponse.body).toHaveLength(1)
     expect(getResponse.body[0]).not.toHaveProperty('uselessProperty')
   })
