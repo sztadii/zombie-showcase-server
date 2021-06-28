@@ -342,7 +342,7 @@ describe('zombies-items', () => {
     expect(getResponse.body[0]).toHaveProperty('createdAt')
   })
 
-  it('POST /zombies/:userId/items ignore useless properties send by client during creation', async () => {
+  it('POST /zombies/:userId/items ignore useless properties sent by client during creation', async () => {
     const item = await createItem({
       price: 100,
       name: 'Chocolate'
