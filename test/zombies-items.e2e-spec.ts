@@ -91,14 +91,14 @@ describe('zombies-items', () => {
     )
   })
 
-  it('GET /external/items return empty list of when items collection is empty', async () => {
+  it('GET /external/items return empty list when items collection is empty', async () => {
     const response = await server.get('/external/items')
 
     expect(response.status).toBe(200)
     expect(response.body).toHaveLength(0)
   })
 
-  it('POST /external/items create new item document', async () => {
+  it('POST /external/items create and return new item', async () => {
     const response = await server.post('/external/items').send({
       price: 100,
       name: 'Chocolate'
@@ -127,14 +127,14 @@ describe('zombies-items', () => {
     expect(wrongTypeResponse.status).toBe(400)
   })
 
-  it('GET /external/rates return empty list of when rates collection is empty', async () => {
+  it('GET /external/rates return empty list when rates collection is empty', async () => {
     const response = await server.get('/external/rates')
 
     expect(response.status).toBe(200)
     expect(response.body).toHaveLength(0)
   })
 
-  it('POST /external/rates create new currency rate document', async () => {
+  it('POST /external/rates create and return a new currency rate', async () => {
     const response = await server.post('/external/rates').send({
       currency: 'Dollar',
       ask: 3.8,
