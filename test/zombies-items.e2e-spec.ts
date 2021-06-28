@@ -110,17 +110,20 @@ describe('zombies-items', () => {
     expect(response.body).toHaveProperty('name', 'Chocolate')
   })
 
-  it('POST /external/items throw validation error', async () => {
+  it('POST /external/items throw an error when request body has missing property', async () => {
     const missingPriceResponse = await server.post('/external/items').send({
       name: 'Chocolate'
     })
 
+    expect(missingPriceResponse.status).toBe(400)
+  })
+
+  it('POST /external/items throw an error when the request body property has wrong type', async () => {
     const wrongTypeResponse = await server.post('/external/items').send({
       name: 'Chocolate',
       price: 'xxxx'
     })
 
-    expect(missingPriceResponse.status).toBe(400)
     expect(wrongTypeResponse.status).toBe(400)
   })
 
