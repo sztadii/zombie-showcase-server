@@ -150,23 +150,27 @@ describe('zombies-items', () => {
     expect(response.body).toHaveProperty('ask', 3.8)
   })
 
-  it('POST /external/rates throw validation error', async () => {
-    const emptyDataResponse = await server.post('/external/rates').send({})
-
+  it('POST /external/rates throw an error when request body has missing property', async () => {
     const missingDataResponse = await server.post('/external/rates').send({
       currency: 'Dollar',
       code: 'USD'
     })
+    expect(missingDataResponse.status).toBe(400)
+  })
 
+  it('POST /external/rates throw an error when request body has empty object', async () => {
+    const emptyDataResponse = await server.post('/external/rates').send({})
+
+    expect(emptyDataResponse.status).toBe(400)
+  })
+
+  it('POST /external/rates throw an error when request body object property has wrong type', async () => {
     const wrongTypeResponse = await server.post('/external/rates').send({
       currency: 'Dollar',
       ask: 'xxx',
       bid: 'xxx',
       code: 'USD'
     })
-
-    expect(emptyDataResponse.status).toBe(400)
-    expect(missingDataResponse.status).toBe(400)
     expect(wrongTypeResponse.status).toBe(400)
   })
 
