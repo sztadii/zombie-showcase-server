@@ -9,7 +9,7 @@ export class ItemsService extends CRUDService<ItemDTO> {
     super('items')
   }
 
-  async fetchAndUpdateItems() {
+  async fetchAndReplaceItems() {
     console.log('fetchAndUpdateItems start')
 
     try {

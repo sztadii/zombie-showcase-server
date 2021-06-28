@@ -12,7 +12,7 @@ export class CurrencyRatesService extends CRUDService<CurrencyRateDTO> {
     super('currency-rates')
   }
 
-  async fetchAndUpdateCurrencyRates() {
+  async fetchAndReplaceCurrencyRates() {
     console.log('fetchAndUpdateCurrencyRates start')
 
     try {
