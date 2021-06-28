@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # We modify the PORT env to be sure that we still allow to modify our docker container's port
+      # We modify the PORT env to be sure that we can modify our docker container's port
       - name: Building and run docker container
         run: |
           docker build . -t zombie-image
