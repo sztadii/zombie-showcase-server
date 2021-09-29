@@ -1,13 +1,8 @@
-import { getServer, Server } from './test-utils'
+import { getServer } from './test-utils'
 
 describe('app', () => {
-  let server: Server
-
-  beforeAll(async () => {
-    server = await getServer()
-  })
-
   it('GET / return welcome message', async (done) => {
+    const server = await getServer()
     const response = await server.get('/')
 
     expect(response.status).toBe(200)
