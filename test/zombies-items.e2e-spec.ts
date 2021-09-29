@@ -17,31 +17,6 @@ describe('zombies-items', () => {
     await cleanDatabase()
   })
 
-  async function createZombie(zombie?: Partial<ZombieDTO>): Promise<ZombieDTO> {
-    const newZombie = { name: 'Random zombie name', ...(zombie || {}) }
-    const postResponse = await server.post('/zombies').send(newZombie)
-    return postResponse.body
-  }
-
-  async function createItem(item?: Partial<ItemDTO>): Promise<ItemDTO> {
-    const newItem = {
-      price: 100,
-      name: 'Random item name',
-      ...(item || {})
-    }
-    const itemResponse = await server.post('/external/items').send(newItem)
-    return itemResponse.body
-  }
-
-  async function createZombieItem(
-    zombieItem?: Partial<ZombieItemDTO>
-  ): Promise<ZombieItemDTO> {
-    const zombieItemResponse = await server
-      .post(`/zombies/${zombieItem.userId}/items`)
-      .send(zombieItem)
-    return zombieItemResponse.body
-  }
-
   it('POST /external will fetch and save all external resources', async () => {
     nock('http://api.nbp.pl')
       .get('/api/exchangerates/tables/C')
@@ -463,4 +438,29 @@ describe('zombies-items', () => {
     expect(beforeDeleteGetResponse.body).toHaveLength(1)
     expect(afterDeleteGetResponse.body).toHaveLength(1)
   })
+
+  async function createZombie(zombie?: Partial<ZombieDTO>): Promise<ZombieDTO> {
+    const newZombie = { name: 'Random zombie name', ...(zombie || {}) }
+    const postResponse = await server.post('/zombies').send(newZombie)
+    return postResponse.body
+  }
+
+  async function createItem(item?: Partial<ItemDTO>): Promise<ItemDTO> {
+    const newItem = {
+      price: 100,
+      name: 'Random item name',
+      ...(item || {})
+    }
+    const itemResponse = await server.post('/external/items').send(newItem)
+    return itemResponse.body
+  }
+
+  async function createZombieItem(
+    zombieItem?: Partial<ZombieItemDTO>
+  ): Promise<ZombieItemDTO> {
+    const zombieItemResponse = await server
+      .post(`/zombies/${zombieItem.userId}/items`)
+      .send(zombieItem)
+    return zombieItemResponse.body
+  }
 })
